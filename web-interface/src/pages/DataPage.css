@@ -1,0 +1,84 @@
+.data-page {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.table-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-top: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    padding: 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table td {
+    padding: 16px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9375rem;
+}
+
+.data-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.code {
+    font-family: monospace;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.750rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge.confirmed,
+.status-badge.approved {
+    background-color: #ecfdf5;
+    color: #10b981;
+}
+
+.status-badge.pending {
+    background-color: #fffbeb;
+    color: #f59e0b;
+}
+
+.status-badge.cancelled,
+.status-badge.rejected {
+    background-color: #fef2f2;
+    color: #ef4444;
+}
+
+.empty-state-container {
+    padding: 48px;
+    text-align: center;
+    color: #64748b;
+}
+
+.loading-spinner-container {
+    padding: 48px;
+    display: flex;
+    justify-content: center;
+}

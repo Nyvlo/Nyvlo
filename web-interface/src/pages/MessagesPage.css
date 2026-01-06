@@ -1,0 +1,57 @@
+.messages-page {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.messages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 24px;
+}
+
+@media (max-width: 500px) {
+    .messages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.message-card {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message-card label {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.message-card textarea {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    outline: none;
+    resize: vertical;
+}
+
+.message-card textarea:focus {
+    border-color: #10b981;
+    background-color: #ffffff;
+}
+
+.variable-hints {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    gap: 8px;
+}

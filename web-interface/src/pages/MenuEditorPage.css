@@ -1,0 +1,331 @@
+.menu-editor-page {
+    padding: 32px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+@media (max-width: 1100px) {
+    .editor-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.list-header h2 {
+    color: #1e293b;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.add-button {
+    background-color: #ecfdf5;
+    color: #10b981;
+    border: 1px solid #10b981;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-button:hover {
+    background-color: #d1fae5;
+}
+
+.items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.menu-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border: 1px solid #e2e8f0;
+    transition: box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.menu-card.nested-card {
+    background-color: #f8fafc;
+    padding: 16px;
+    border-left: 3px solid #10b981;
+}
+
+.menu-card:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-number {
+    width: 32px;
+    height: 32px;
+    background-color: #e2e8f0;
+    color: #475569;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: #94a3b8;
+}
+
+.delete-button:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.empty-state {
+    color: #64748b;
+    text-align: center;
+    padding: 40px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.submenu-section {
+    margin-top: 8px;
+    padding: 16px;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
+}
+
+.submenu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.submenu-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.add-sub-button {
+    background: transparent;
+    color: #10b981;
+    border: 1px solid #10b981;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-sub-button:hover {
+    background: #ecfdf5;
+}
+
+.submenu-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.empty-submenu {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-style: italic;
+    text-align: center;
+    margin: 8px 0;
+}
+
+/* Phone Preview Styling - Light Theme */
+.preview-section h2 {
+    color: #1e293b;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.phone-preview {
+    width: 350px;
+    height: 650px;
+    background-color: #1e293b;
+    border-radius: 40px;
+    border: 12px solid #334155;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.phone-header {
+    background-color: #008069;
+    color: white;
+}
+
+.phone-status-bar {
+    padding: 10px 24px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.chat-header {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #008069;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.contact-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.contact-status {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.chat-icons {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 12px;
+    color: white;
+}
+
+.chat-body {
+    flex: 1;
+    background-color: #e5ddd5;
+    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+    background-size: 300px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.message-bubble {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    position: relative;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble.received {
+    background-color: white;
+    color: #111b21;
+    border-top-left-radius: 0;
+}
+
+.message-bubble pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: inherit;
+}
+
+.message-time {
+    font-size: 0.65rem;
+    color: #667781;
+    float: right;
+    margin-top: 4px;
+}
+
+.chat-footer {
+    background-color: #f0f2f5;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-placeholder {
+    flex: 1;
+    background-color: white;
+    color: #54656f;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    border: none;
+}
+
+.mic-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #00a884;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}

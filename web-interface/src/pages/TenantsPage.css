@@ -1,0 +1,442 @@
+.tenants-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-icon {
+    width: 48px;
+    height: 48px;
+    padding: 10px;
+    background-color: var(--primary-color, #10b981);
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+.page-header h1 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    max-width: 400px;
+    color: #94a3b8;
+}
+
+.search-bar input {
+    border: none;
+    background: none;
+    outline: none;
+    width: 100%;
+    color: #1e293b;
+}
+
+.stats-mini {
+    display: flex;
+    gap: 24px;
+    background: #f1f5f9;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.tenants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.tenant-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.tenant-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.tenant-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #cbd5e1;
+}
+
+.status-active::before {
+    background: #10b981;
+}
+
+.status-trial::before {
+    background: #3b82f6;
+}
+
+.status-suspended::before {
+    background: #f59e0b;
+}
+
+.status-expired::before {
+    background: #ef4444;
+}
+
+.tenant-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.tenant-alias {
+    width: 40px;
+    height: 40px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.tenant-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.bridge-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #f5f3ff;
+    color: #7c3aed;
+    border: 1px solid #ddd6fe;
+    margin-left: 8px;
+}
+
+.status-active .tenant-status-badge {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status-trial .tenant-status-badge {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.status-suspended .tenant-status-badge {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.status-expired .tenant-status-badge {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.tenant-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.tenant-id {
+    font-size: 12px;
+    color: #94a3b8;
+    background: #f8fafc;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.tenant-stats {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.expire-date {
+    grid-column: span 2;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.tenant-card-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.btn-icon.btn-danger:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+
+/* --- COMPACT MODAL STYLES --- */
+.modal-content-compact {
+    max-width: 900px;
+    /* Wider modal for 2 columns */
+    width: 95%;
+    padding: 0;
+    overflow: hidden;
+    background: white;
+    border-radius: 16px;
+}
+
+.modal-header-compact {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.modal-header-compact h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.form-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.column-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.form-group-compact label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.form-group-compact input,
+.form-group-compact select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    outline: none;
+}
+
+.form-group-compact input:focus,
+.form-group-compact select:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.form-row-compact {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row-compact>div,
+.form-row-compact>input {
+    flex: 1;
+}
+
+.form-grid-3-compact {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-compact-section {
+    background: #ecfdf5;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #d1fae5;
+}
+
+.section-subtitle {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 8px;
+}
+
+.admin-compact-section input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1fae5;
+    background: white;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.admin-compact-section input:last-child {
+    margin-bottom: 0;
+}
+
+.checkbox-compact {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f5f3ff;
+    border-radius: 8px;
+    border: 1px dashed #ddd6fe;
+}
+
+.checkbox-compact label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6d28d9;
+    cursor: pointer;
+}
+
+.modal-actions-compact {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-primary {
+    background-color: #10b981 !important;
+    /* Force green background */
+    color: white !important;
+    /* Force white text */
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 1;
+    /* Ensure not transparent */
+}
+
+.btn-primary:hover {
+    background-color: #059669 !important;
+    /* Darker green on hover */
+    filter: brightness(0.95);
+}
+
+.btn-secondary {
+    background: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #f1f5f9;
+}

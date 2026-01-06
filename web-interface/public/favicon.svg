@@ -1,0 +1,9 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M50 5 L85 15 V45 C85 65 70 85 50 95 C30 85 15 65 15 45 V15 L50 5Z"
+    fill="#1D3D6B"
+  />
+  <text x="50" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="white">K</text>
+  <circle cx="75" cy="35" r="10" fill="#59C348" />
+  <path d="M72 35 L78 35 M75 32 L75 38" stroke="white" stroke-width="2" stroke-linecap="round" />
+</svg>

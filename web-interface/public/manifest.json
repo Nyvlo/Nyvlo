@@ -1,0 +1,16 @@
+{
+    "name": "Nyvlo Omnichannel",
+    "short_name": "Nyvlo",
+    "icons": [
+        {
+            "src": "/assets/logo_final.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#1D3D6B",
+    "background_color": "#020617"
+}
