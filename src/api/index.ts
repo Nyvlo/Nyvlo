@@ -19,6 +19,7 @@ import { EmailService } from '../services/email-service';
 import { SchedulingService } from '../services/scheduling-service';
 import { createSchedulingRoutes } from './routes/scheduling.routes';
 import { tenantActiveMiddleware } from './middleware/auth.middleware';
+import { createExternalIntegrationRoutes } from './routes/external-integration.routes';
 
 export function createApiRouter(
   database: DatabaseService,
@@ -53,6 +54,11 @@ export function createApiRouter(
   // Scheduling Module
   const schedService = schedulingService || new SchedulingService(database, logger);
   router.use('/scheduling', createSchedulingRoutes(schedService));
+
+  // External Integration API (v1)
+  // Utiliza autenticação própria via API Key, por isso definida aqui para aproveitar/evitar middlewares globais se necessário
+  // mas como o apiKeyMiddleware checa o tenant, está seguro.
+  router.use('/v1/integration', createExternalIntegrationRoutes(database, getWhatsAppManager(), logger));
 
   return router;
 }

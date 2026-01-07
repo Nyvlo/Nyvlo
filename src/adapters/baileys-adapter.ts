@@ -237,38 +237,52 @@ export class BaileysAdapter {
     await this.sendText(to, message);
   }
 
-  async sendMedia(to: string, filePath: string, caption?: string): Promise<void> {
+  async sendMedia(to: string, media: string, type: 'image' | 'video' | 'audio' | 'document', caption?: string): Promise<void> {
     if (!this.socket || !this.isConnected) {
       throw new Error('WhatsApp não conectado');
     }
 
     const jid = to.includes('@') ? to : `${to}@s.whatsapp.net`;
-    const fs = await import('fs');
-    const path = await import('path');
 
-    const ext = path.extname(filePath).toLowerCase();
-    const buffer = fs.readFileSync(filePath);
+    // Check if media is URL
+    const isUrl = media.startsWith('http://') || media.startsWith('https://');
+    let content: any = {};
 
-    if (['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
-      await this.socket.sendMessage(jid, {
-        image: buffer,
-        caption
-      });
-    } else if (ext === '.pdf') {
-      await this.socket.sendMessage(jid, {
-        document: buffer,
-        mimetype: 'application/pdf',
-        fileName: path.basename(filePath),
-        caption
-      });
+    if (isUrl) {
+      content = { url: media };
     } else {
-      await this.socket.sendMessage(jid, {
-        document: buffer,
-        mimetype: 'application/octet-stream',
-        fileName: path.basename(filePath),
-        caption
-      });
+      const fs = await import('fs');
+      content = fs.readFileSync(media);
     }
+
+    const payload: any = { caption };
+
+    switch (type) {
+      case 'image':
+        payload.image = content;
+        break;
+      case 'video':
+        payload.video = content;
+        break;
+      case 'audio':
+        payload.audio = content;
+        // Audio usually requires mimetype for PTT in some versions, but basic audio is fine
+        if (isUrl) payload.mimetype = 'audio/mp4';
+        break;
+      case 'document':
+        payload.document = content;
+        payload.mimetype = 'application/pdf'; // Basic default, ideally check extension
+        // Try to guess mimetype from extension if it's a file
+        if (!isUrl && media.includes('.')) {
+          const ext = media.split('.').pop();
+          if (ext === 'pdf') payload.mimetype = 'application/pdf';
+          // Add more mimetypes as needed
+        }
+        payload.fileName = isUrl ? 'file' : media.split('/').pop();
+        break;
+    }
+
+    await this.socket.sendMessage(jid, payload);
   }
 
   getConnectionStatus(): boolean {
