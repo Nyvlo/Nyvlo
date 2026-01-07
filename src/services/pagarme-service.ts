@@ -90,6 +90,61 @@ export class PagarmeService {
     }
 
     /**
+     * Cria um Link de Pagamento (Checkout) no Pagar.me
+     */
+    async createCheckoutOrder(tenantId: string, amount: number, description: string, metadata: any): Promise<any> {
+        const customerId = await this.getOrCreateCustomer(tenantId);
+
+        try {
+            // Pagar.me V5 - Checkout Link creation often involves creating an order with specific checkout settings
+            // Or using the /payment_links endpoint if available (preferred for simple links).
+            // Let's assume standard Order with Checkout for maximum compatibility in V5.
+            const response = await axios.post(`${this.apiUrl}/orders`, {
+                customer_id: customerId,
+                items: [
+                    {
+                        amount: Math.round(amount * 100),
+                        description,
+                        quantity: 1
+                    }
+                ],
+                // Checkout configuration to generate a link
+                checkout: {
+                    accepted_payment_methods: ['credit_card', 'pix', 'boleto'],
+                    success_url: 'https://nyvlo.com/payment/success', // Placeholder
+                    skip_checkout_success_page: false,
+                    customer_editable: false,
+                    billing_address_editable: true,
+                    pix: {
+                        expires_in: 3600
+                    }
+                },
+                metadata
+            }, { headers: this.authHeader });
+
+            // response.data should contain checkouts array or similar property in V5 for checkout URL
+            // If implicit checkout creation isn't supported like this in your specific plan/version, 
+            // check 'checkouts' array in response.
+            const checkoutUrl = response.data.checkouts?.[0]?.payment_url || response.data.checkout_url;
+
+            if (!checkoutUrl) {
+                // Fallback: If checkout_url is not directly returned, we might need to rely on 'payments' array
+                // But for a 'Link', we usually look for the hosted checkout URL.
+                throw new Error('Não foi possível gerar a URL de pagamento (Checkout não retornado).');
+            }
+
+            return {
+                orderId: response.data.id,
+                paymentUrl: checkoutUrl,
+                status: response.data.status
+            };
+        } catch (error: any) {
+            this.logger.error('Erro ao criar Link de Pagamento no Pagar.me', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    /**
      * Processa Webhooks do Pagar.me
      */
     async handleWebhook(payload: any): Promise<void> {

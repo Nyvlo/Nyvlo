@@ -153,6 +153,38 @@ export class PaymentService {
         }
     }
 
+    async generatePaymentLink(tenantId: string, userId: string, itemId: string, amount: number, config: any): Promise<any> {
+        // Preferência por Pagar.me para Payment Links se não especificado
+        // Se Asaas for o padrão, o Asaas também tem PaymentLinks, mas o user pediu Pagar.me especificamente.
+        // Vou forçar Pagar.me se o provider for pagarme ou undefined (dado o pedido do user).
+        // Mas manterei a lógica de config se existir.
+
+        const provider = config?.provider || 'pagarme'; // Defaulting to pagarme here as per request context, or config
+
+        if (provider === 'pagarme') {
+            try {
+                const order = await this.pagarme.createCheckoutOrder(tenantId, amount, `Compra de Item Ref: ${itemId}`, {
+                    type: 'item',
+                    tenantId,
+                    userId,
+                    itemId
+                });
+                return {
+                    success: true,
+                    orderId: order.orderId,
+                    paymentUrl: order.paymentUrl,
+                    provider: 'pagarme'
+                };
+            } catch (error: any) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Se for Asaas (fallback ou config explícita)
+        // Implementação simplificada de Link de Pagamento no Asaas se necessário futuramente.
+        return { success: false, error: 'Provedor de Link de Pagamento não suportado ou configurado.' };
+    }
+
     private async createAsaasCustomer(tenant: any): Promise<string> {
         const admin = await this.database.get<any>('SELECT email, name FROM web_users WHERE tenant_id = ? AND role = \'admin\' LIMIT 1', [tenant.id]);
         const response = await axios.post(`${this.asaasApiUrl}/customers`, {

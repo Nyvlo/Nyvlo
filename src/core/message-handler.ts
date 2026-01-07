@@ -728,6 +728,38 @@ export class MessageHandler {
     }
 
     try {
+      // Tenta gerar Link de Pagamento (Checkout) primeiro, preferido para Pagar.me
+      const paymentLink = await this.paymentService.generatePaymentLink(
+        this.currentTenantId,
+        userId,
+        course.id,
+        course.price,
+        this.config.payment as any
+      );
+
+      if (paymentLink.success && paymentLink.paymentUrl) {
+        await this.stateManager.updateContext(userId, {
+          currentOrder: {
+            orderId: paymentLink.orderId,
+            amount: course.price,
+            paymentUrl: paymentLink.paymentUrl
+          }
+        });
+
+        await this.stateManager.transition(userId, BotState.PAYMENT_PENDING);
+
+        let message = `💳 *Link de Pagamento Gerado*\n\n`;
+        message += `Item: ${course.name}\n`;
+        message += `Valor: R$ ${course.price.toFixed(2)}\n\n`;
+        message += `Para finalizar sua compra com Cartão, PIX ou Boleto, acesse o link seguro abaixo:\n\n`;
+        message += `${paymentLink.paymentUrl}\n\n`;
+        message += `Você será redirecionado para o ambiente seguro do Pagar.me.\n\n`;
+        message += `Digite 0 para cancelar e voltar.`;
+
+        return this.createResponse([message], BotState.PAYMENT_PENDING);
+      }
+
+      // Fallback para PIX direto (útil para Asaas ou erro no Link)
       const pix = await this.paymentService.generatePIX(
         this.currentTenantId,
         userId,
@@ -736,7 +768,7 @@ export class MessageHandler {
         this.config.payment as any
       );
 
-      if (!pix.success) throw new Error(pix.error);
+      if (!pix.success) throw new Error(pix.error || paymentLink.error || 'Erro desconhecido');
 
       await this.stateManager.updateContext(userId, {
         currentOrder: {
@@ -760,7 +792,7 @@ export class MessageHandler {
       return this.createResponse([message], BotState.PAYMENT_PENDING);
     } catch (error) {
       this.logger.error('Erro ao processar compra', error as Error);
-      return this.createResponse(['Desculpe, não conseguimos gerar o seu PIX. Tente novamente mais tarde.'], BotState.COURSE_DETAIL);
+      return this.createResponse(['Desculpe, não conseguimos gerar o seu link de pagamento. Tente novamente mais tarde.'], BotState.COURSE_DETAIL);
     }
   }
 

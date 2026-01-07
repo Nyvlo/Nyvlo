@@ -74,8 +74,9 @@ export interface ConversationContext {
   currentOrder?: {
     orderId: string;
     amount: number;
-    pixCopyPaste: string;
+    pixCopyPaste?: string;
     pixQrCode?: string;
+    paymentUrl?: string;
   };
 }
 
