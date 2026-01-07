@@ -1,137 +1,130 @@
-# 🚀 Nyvlo Omnichannel - Plataforma de Automação para WhatsApp
+# 🚀 Nyvlo Omnichannel - Sistema de Atendimento Inteligente White Label
 
-Plataforma completa para automação de atendimento via WhatsApp com painel administrativo avançado.
+Plataforma SaaS Multi-Tenant para automação de atendimento via WhatsApp, potencializada por Inteligência Artificial Generativa.
 
-## 📋 Funcionalidades
+O **Nyvlo Omnichannel** é uma solução White Label projetada para se adaptar a qualquer nicho de mercado (Clínicas, Advogados, Varejo, Educação, Logística, etc), permitindo que empresas automatizem seu atendimento com personalidade e eficiência.
 
-- ✅ Menu interativo com navegação por números
-- ✅ Informações detalhadas sobre cursos
-- ✅ Agendamento de visitas com lembretes automáticos
-- ✅ Pré-matrícula completa pelo WhatsApp
-- ✅ FAQ com perguntas frequentes
-- ✅ Transferência para atendente humano
-- ✅ Envio e recebimento de documentos
-- ✅ Painel administrativo web
-- ✅ Backup automático de dados
+## 🌟 Diferenciais
+
+- **🧠 I.A. Contextual**: O bot assume personas diferentes (ex: Médico atencioso, Advogado formal, Vendedor persuasivo) dependendo do ramo da empresa.
+- **📄 Leitura de Documentos**: Envie um PDF ou foto e a IA extrai os dados (CPF, Nome, Endereço) e preenche o cadastro automaticamente.
+- **💳 Pagamentos Integrados**: Gera links de checkout (Pagar.me) e QR Code Pix diretamente no WhatsApp.
+- **🔌 API Aberta**: Conecte seu CRM ou ERP para enviar mensagens e gerenciar contatos via API REST.
+- **📡 Webhooks em Tempo Real**: Notifique seu sistema sobre cada mensagem recebida ou alteração de status.
+
+## 📋 Funcionalidades Principais
+
+- ✅ **Menu Dinâmico**: Navegação intuitiva adaptada ao tipo de negócio.
+- ✅ **Catálogo de Serviços/Produtos**: Vitrine virtual gerenciável via painel.
+- ✅ **Agendamento Inteligente**: Gestão de horários para consultas, visitas ou reuniões.
+- ✅ **Captura de Leads**: Coleta qualificada de dados (Nome, Interesses, Orçamento).
+- ✅ **FAQ Automatizado**: Respostas instantâneas baseadas na base de conhecimento da empresa.
+- ✅ **Transbordo Humano**: Transferência suave para atendentes quando necessário.
+- ✅ **Painel Multi-Tenant**: Gestão de múltiplas empresas (SaaS) em uma única instalação.
 
 ## 🚀 Instalação
 
 ### Pré-requisitos
 
 - Node.js 18+
-- npm ou yarn
+- PostgreSQL
+- Redis (Opcional, para filas de alta performance)
 
 ### Passos
 
 1. Clone o repositório e instale as dependências:
 
 ```bash
+git clone https://github.com/Nyvlo/Nyvlo.git
+cd Nyvlo
 npm install
 ```
 
-2. Crie um administrador para o painel:
+2. Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+# Edite o .env com suas credenciais de banco e API Keys de IA (OpenAI/Groq)
+```
+
+3. Crie o primeiro usuário Super Admin:
 
 ```bash
 npx ts-node scripts/create-admin.ts
 ```
 
-3. Compile o projeto:
+4. Compile o projeto:
 
 ```bash
 npm run build
 ```
 
-4. Inicie o bot:
+5. Inicie o sistema:
 
 ```bash
 npm start
 ```
 
-5. Escaneie o QR Code com seu WhatsApp
+## ⚙️ Configuração White Label
 
-## ⚙️ Configuração
+O sistema vem com templates de indústria pré-configurados. No painel administrativo, você pode selecionar o ramo da empresa e a IA se adaptará automaticamente.
 
-Edite o arquivo `config/bot-config.json` para personalizar:
+Indústrias Suportadas Nativamente:
+- 🏥 Saúde / Clínicas
+- 🎓 Educação / Cursos
+- ⚖️ Jurídico / Advocacia
+- 🍔 Restaurantes / Delivery
+- 🏋️ Fitness / Academias
+- 🏢 Imobiliárias
+- 🚜 Agronegócio
+- 🔧 Automotivo / Oficinas
+- ... e muito mais (configurável).
 
-- Informações da empresa
-- Horário de funcionamento
-- Mensagens do bot
-- Cursos disponíveis
-- Perguntas frequentes
-
-### Exemplo de configuração:
+### Exemplo de Configuração (JSON):
 
 ```json
 {
   "company": {
-    "name": "Modus Centro de Formação de Vigilantes",
-    "address": "Rua Exemplo, 123",
-    "phone": "(00) 0000-0000"
+    "name": "Sua Empresa Aqui",
+    "industryType": "medical", // ou 'legal', 'real_estate', etc.
+    "ai_enabled": true
   },
   "businessHours": {
-    "weekdays": { "start": "08:00", "end": "18:00" },
-    "saturday": { "start": "08:00", "end": "12:00" }
+    "weekdays": { "start": "08:00", "end": "18:00" }
   }
 }
 ```
 
 ## 🖥️ Painel Administrativo
 
-Acesse `http://localhost:5173` após iniciar o bot.
+Acesse `http://localhost:5173` (ou sua URL de deploy).
 
-Funcionalidades:
-- Dashboard com métricas
-- Visualização de conversas
-- Gerenciamento de agendamentos
-- Acompanhamento de matrículas
-- Exportação de relatórios (CSV)
-- Backup do banco de dados
+Funcionalidades do Painel:
+- **Dashboard SaaS**: Visão geral de todos os Tenants (clientes).
+- **Live Chat**: Atendimento humano com múltiplos agentes.
+- **Construtor de Bot**: Configure fluxos e respostas sem código.
+- **Financeiro**: Acompanhe vendas e assinaturas do SaaS.
 
 ## 📁 Estrutura do Projeto
 
 ```
 ├── src/
 │   ├── adapters/       # Conexão com WhatsApp (Baileys)
-│   ├── admin/          # Painel administrativo
-│   ├── config/         # Carregamento de configuração
-│   ├── core/           # State machine e message handler
-│   ├── services/       # Serviços de negócio
-│   ├── types/          # Definições TypeScript
-│   └── utils/          # Utilitários (validadores)
-├── tests/
-│   ├── unit/           # Testes unitários
-│   └── property/       # Testes de propriedade
-├── config/             # Arquivos de configuração
-├── data/               # Banco de dados SQLite
-├── logs/               # Arquivos de log
-└── uploads/            # Documentos enviados
+│   ├── admin/          # Backend do Painel Administrativo
+│   ├── api/            # API REST Pública (Integração)
+│   ├── core/           # Motor do Chatbot (State Machine)
+│   ├── services/       # Serviços (IA, Pagamento, Agendamento...)
+│   │   ├── industry-template-service.ts # Templates de Nicho
+│   │   ├── ai-service.ts                # Motor de Inteligência
+│   └── types/          # Definições TypeScript
+├── web-interface/      # Frontend React (Vite)
+└── ...
 ```
-
-## 🧪 Testes
-
-```bash
-# Rodar todos os testes
-npm test
-
-# Rodar com cobertura
-npm run test:coverage
-```
-
-## 📝 Comandos do Bot
-
-| Comando | Ação |
-|---------|------|
-| `menu` ou `0` | Voltar ao menu principal |
-| `1-6` | Selecionar opção do menu |
-| `voltar` | Voltar ao menu anterior |
 
 ## 🔒 Segurança
 
-- Senhas armazenadas com bcrypt
-- Autenticação JWT no painel admin
-- Validação de CPF com algoritmo oficial
-- Logs de todas as operações
+- Senhas criptografadas (bcrypt) e Autenticação JWT.
+- Proteção de rotas API com `x-api-key`.
+- Separação total de dados entre Tenants (Multi-tenancy lógico).
 
 ## 📄 Licença
-
-ISC
+Proprietário - Todos os direitos reservados.
