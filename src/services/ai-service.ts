@@ -398,6 +398,47 @@ FORMATO DE RESPOSTA JSON:
     };
   }
 
+  async extractData(text: string, fields: string[]): Promise<any> {
+    const systemPrompt = `Você é um Assistente de Processamento de Documentos e Enriquecimento de Dados.
+    Analise o texto fornecido (extraído de um documento) e extraia as seguintes informações para enriquecer o cadastro do cliente:
+    ${fields.join(', ')}
+
+    INSTRUÇÕES:
+    1. Retorne APENAS um JSON válido.
+    2. Se encontrar múltiplos valores (ex: vários endereços ou telefones), coloque-os em listas/arrays.
+    3. Normalize os dados (ex: remova formatação de CPF/CNPJ, padronize telefones com DDI+DDD).
+    4. Se não encontrar uma informação, coloque null ou omita a chave.
+    5. Procure também por informações implícitas úteis (ex: profissão, estado civil, renda) e coloque num campo "extra_info".
+
+    Exemplo de Saída:
+    {
+      "nome": "Fulano de Tal",
+      "cpf": "12345678900",
+      "emails": ["email1@test.com", "email2@test.com"],
+      "telefones": ["5511999999999", "551133333333"],
+      "enderecos": [
+        { "logradouro": "Rua X", "numero": "10", "cidade": "SP", "tipo": "residencial" }
+      ],
+      "extra_info": { "profissao": "Engenheiro" }
+    }`;
+
+    const userPrompt = `DOCUMENTO PARA ANÁLISE:\n${text.substring(0, 15000)}`; // Limite de caracteres para segurança
+
+    try {
+      this.logger.info('Solicitando extração de dados à IA...');
+      const response = await this.callAI(systemPrompt, userPrompt);
+
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      return null;
+    } catch (error) {
+      this.logger.error('Erro ao extrair dados com IA', error as Error);
+      return null;
+    }
+  }
+
   async validateConfig(): Promise<{ valid: boolean; error?: string }> {
     if (!this.config.enabled) {
       return { valid: false, error: 'IA não está habilitada' };

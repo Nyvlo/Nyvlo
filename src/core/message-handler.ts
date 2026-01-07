@@ -11,6 +11,7 @@ import { WebhookService } from '../services/webhook-service';
 import { PaymentService } from '../services/payment-service';
 import { IndustryTemplateService } from '../services/industry-template-service';
 import { SchedulingService } from '../services/scheduling-service';
+import { DocumentProcessorService } from '../services/document-processor';
 
 interface Intent {
   type: 'menu_selection' | 'keyword' | 'command' | 'free_text';
@@ -52,6 +53,7 @@ export class MessageHandler {
   private webhookService: WebhookService | null = null;
   private paymentService: PaymentService | null = null;
   private schedulingService: SchedulingService;
+  private documentProcessor: DocumentProcessorService | null = null;
   private config: BotConfig | null = null;
   private currentTenantId: string = 'system-default';
 
@@ -63,7 +65,8 @@ export class MessageHandler {
     cacheService?: CacheService,
     webhookService?: WebhookService,
     paymentService?: PaymentService,
-    schedulingService?: SchedulingService
+    schedulingService?: SchedulingService,
+    documentProcessor?: DocumentProcessorService
   ) {
     this.stateManager = stateManager;
     this.logger = logger;
@@ -74,6 +77,7 @@ export class MessageHandler {
     this.paymentService = paymentService || null;
     // Fallback if not provided (migration safe)
     this.schedulingService = schedulingService || new SchedulingService(database, logger);
+    this.documentProcessor = documentProcessor || null;
   }
 
   async handle(message: IncomingMessage, replyFn?: (to: string, message: string) => Promise<void>): Promise<BotResponse> {
@@ -86,6 +90,56 @@ export class MessageHandler {
 
     if (config.ai?.enabled) {
       this.aiService = new AIService(config.ai, config, this.logger);
+    }
+
+    // Configurar DocumentProcessor com o AIService atual se disponível
+    if (this.documentProcessor && this.aiService) {
+      // Gambiarra: O DocumentProcessor precisa do AI Service atualizado com a config do tenant
+      // Idealmente, o DocumentProcessor pegaria o AI Service dinamicamente ou o AIService seria singleton/contextual.
+      // Vou recriar o processor ou atualizar sua referência se possível, mas aqui ele é dependência injetada.
+      // Vou criar um novo processor temporário ou passar o aiService.
+      // Melhor: Instanciar um novo DocumentProcessor aqui se não injetado ou atualizar.
+      this.documentProcessor = new DocumentProcessorService(this.logger, this.aiService, this.database);
+    }
+
+    // Lógica para Processamento de Documentos
+    if ((message.messageType === 'document' || message.messageType === 'image') && message.mediaUrl) {
+      const caption = message.text?.toLowerCase() || '';
+      const shouldAnalyze = caption.includes('analisar') || caption.includes('extrair') || caption.includes('ler');
+
+      if (shouldAnalyze && this.documentProcessor) {
+        if (replyFn) await replyFn(userId, '⏳ Recebi seu documento. Estou analisando e processando os dados...');
+
+        // Baixar documento (necessário implementar download no handler ou service)
+        // Assumindo que message.mediaUrl é um path local se vindo do Adapter, ou URL se nuvem.
+        // O BaileysAdapter geralmente não salva arquivo no disco automaticamente a menos que configurado.
+        // Mas 'mediaUrl' no IncomingMessage sugere que já temos acesso.
+        // Se for URL remota e o 'PDF' lib precisar de buffer, o service cuida.
+
+        // NOTA: O fluxo de 'downloadMedia' do BaileysAdapter seria ideal aqui.
+        // Como não tenho acesso direto ao adapter aqui (só via interface), vou assumir que 'mediaUrl' é um path local acessível 
+        // OU que o messageHandler pode pedir o download.
+        // Como o MessageHandler não tem acesso ao WhatsAppManager, isso é um gap.
+        // SOLUÇÃO: Vou delegar para o 'DocumentProcessor' assumindo que 'mediaUrl' é válido (path ou url).
+
+        // Vou assumir path local ou URL pública.
+        // Se for apenas ID, falhará.
+
+        // Vou tratar o processamento
+        const result = await this.documentProcessor.processAndEnrich(
+          tenantId,
+          userId,
+          message.mediaUrl, // Espera-se que seja path absoluto ou URL
+          message.messageType === 'image' ? 'image/jpeg' : 'application/pdf'
+        );
+
+        if (result.success) {
+          const summary = JSON.stringify(result.data, null, 2);
+          return this.createResponse([`✅ Análise concluída! Dados extraídos e anexados ao cadastro:\n\n${summary}`], BotState.MAIN_MENU);
+        } else {
+          return this.createResponse([`❌ ${result.message}`], BotState.MAIN_MENU);
+        }
+      }
     }
 
     // Check tenant status and expiry

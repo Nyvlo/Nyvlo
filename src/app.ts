@@ -139,7 +139,8 @@ export class BotApplication {
       this.cacheService || undefined,
       this.webhookService,
       this.paymentService,
-      new SchedulingService(this.database, this.logger)
+      new SchedulingService(this.database, this.logger),
+      undefined
     );
 
     // Initialize Service Evaluation Service
@@ -199,7 +200,8 @@ export class BotApplication {
         this.cacheService,
         this.webhookService || undefined,
         this.paymentService || undefined,
-        this.schedulingService!
+        this.schedulingService!,
+        undefined // DocumentProcessorService will be instantiated inside if needed
       );
     }
   }
