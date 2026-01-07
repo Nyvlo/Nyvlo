@@ -244,12 +244,29 @@ export class BotApplication {
       });
 
       // Listen for instance status changes
-      this.whatsappManager.on('instanceStatusChanged', (instance) => {
+      this.whatsappManager.on('instanceStatusChanged', async (instance) => {
         this.adminServer!.getIO().emit('instance:status', {
           instanceId: instance.id,
           status: instance.status,
           phone: instance.phone
         });
+
+        // Notify Webhook
+        if (this.webhookService && this.tenantConfigService) {
+          try {
+            const config = await this.tenantConfigService.getBotConfig(instance.tenantId);
+            if (config.webhook?.url && config.webhook.events.includes('instance_status_update')) {
+              this.webhookService.notify(config.webhook.url, 'instance_status_update', {
+                instanceId: instance.id,
+                status: instance.status,
+                phone: instance.phone,
+                tenantId: instance.tenantId
+              });
+            }
+          } catch (e) {
+            this.logger.warn(`Failed to notify webhook for instance status: ${instance.id}`, e as Error);
+          }
+        }
       });
 
       // Listen for QR code generation
@@ -336,6 +353,27 @@ export class BotApplication {
     const startTime = Date.now();
 
     try {
+      // Notify Webhook (Global Message Received)
+      if (instanceId && this.webhookService && this.tenantConfigService && this.whatsappManager) {
+        const instance = this.whatsappManager.getInstance(instanceId);
+        if (instance) {
+          const tenantId = instance.tenantId;
+          // Inject tenantId into message for downstream handlers
+          message.tenantId = tenantId;
+          message.instanceId = instanceId;
+
+          const config = await this.tenantConfigService.getBotConfig(tenantId);
+          if (config.webhook?.url && config.webhook.events.includes('message_received')) {
+            // Fire and forget to not block processing
+            this.webhookService.notify(config.webhook.url, 'message_received', {
+              ...message,
+              tenantId, // Ensure tenantId is in payload
+              instanceId
+            }).catch(e => this.logger.warn('Failed to send webhook message_received', e));
+          }
+        }
+      }
+
       // Increment metrics
       this.metricsService?.incrementMessageReceived();
 
