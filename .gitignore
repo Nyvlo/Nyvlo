@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Project specific
+.env
+.env.*
+! .env.example
+data/
+auth_info/
+auth_info_*/
+backups/
+uploads/
+test_conversations.db
+*.db
+*.sqlite
+.agent/
+.kiro/

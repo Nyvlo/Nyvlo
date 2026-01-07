@@ -6,25 +6,35 @@ import { api } from '../services/api'
 import MainLayout from '../components/layout/MainLayout'
 import {
   MessageSquare,
-  Bot,
   Users,
-  Clock,
-  TrendingUp,
+  LineChart,
+  Bot,
+  Calendar,
   Calendar as CalendarIcon,
   Smartphone,
-  ShieldCheck,
+  CheckCircle2,
+  Clock,
+  ArrowUpRight,
+  TrendingUp,
+  Package,
+  CreditCard,
+  Building2,
+  Search,
+  Filter,
   RefreshCw,
-  Bell,
-  ChevronDown,
+  MoreVertical,
+  Activity,
+  History,
+  ShieldCheck,
+  Send,
+  UserCheck,
+  Download,
+  Brain,
   DollarSign,
   BarChart,
   Target,
-  X,
-  History,
-  Brain,
   Star,
-  MessageCircle,
-  AlertTriangle
+  X
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -122,6 +132,7 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    console.log('[DEBUG] DashboardPage mounted');
     const now = new Date()
     setTodayDate(now.toLocaleDateString('pt-BR', {
       weekday: 'long',

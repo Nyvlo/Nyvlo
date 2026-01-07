@@ -35,11 +35,13 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   }
 
   if (!isAuthenticated) {
+    console.log('[DEBUG] ProtectedRoute: Not authenticated, redirecting to login', { from: location.pathname })
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   // Mandatory password change check
   if (user?.mustChangePassword && location.pathname !== '/account') {
+    console.log('[DEBUG] ProtectedRoute: Password change required, redirecting to account')
     return <Navigate to="/account" replace />
   }
 

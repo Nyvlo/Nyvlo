@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nyvlo-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./backups:/app/backups
+      - ./auth_info:/app/auth_info
+      - ./config:/app/config
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-nyvlo-secret-key-change-in-production}
+      - DB_TYPE=postgres
+      - POSTGRES_URL=postgresql://nyvlo:nyvlo@db:5432/nyvlo
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  frontend:
+    build:
+      context: ./web-interface
+      dockerfile: Dockerfile
+    container_name: nyvlo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: nyvlo-db
+    environment:
+      - POSTGRES_USER=nyvlo
+      - POSTGRES_PASSWORD=nyvlo
+      - POSTGRES_DB=nyvlo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # Changed to 5433 to avoid conflict with local postgres
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: nyvlo-redis
+    ports:
+      - "6380:6379" # Changed to 6380 to avoid conflict with local redis
+    restart: always
+
+volumes:
+  postgres_data:

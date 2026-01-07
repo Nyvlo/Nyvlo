@@ -11,12 +11,12 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children, hideSidebar = false }: MainLayoutProps) {
-    const { user, logout } = useAuthStore()
+    const { user, token, logout } = useAuthStore()
     const { socket, connectSocket } = useChatStore()
     const fetchBranding = useBrandingStore((state) => state.fetchBranding)
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
+        console.log('[DEBUG] MainLayout mounted', { hasToken: !!token, hasSocket: !!socket })
         if (token && !socket) {
             connectSocket(token)
             fetchBranding()

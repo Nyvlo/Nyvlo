@@ -4,7 +4,7 @@ import { DatabaseService } from './database-service';
 import fs from 'fs';
 import path from 'path';
 // @ts-ignore
-import pdf from 'pdf-parse';
+import { PDFParse as pdf } from 'pdf-parse';
 
 export class DocumentProcessorService {
     constructor(
@@ -35,7 +35,9 @@ export class DocumentProcessorService {
             // 1. Extração de Texto
             if (mimeType === 'application/pdf') {
                 const dataBuffer = fs.readFileSync(filePath);
-                const data = await pdf(dataBuffer);
+                // @ts-ignore
+                const parser = new pdf(dataBuffer);
+                const data = await parser.getText();
                 textContent = data.text;
             } else if (mimeType.startsWith('text/')) {
                 textContent = fs.readFileSync(filePath, 'utf-8');

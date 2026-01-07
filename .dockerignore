@@ -1,0 +1,14 @@
+node_modules/
+dist/
+data/*.db
+data/*.sqlite
+logs/
+uploads/
+backups/
+auth_info/
+npm-debug.log*
+.git/
+.vscode/
+.env
+Dockerfile
+docker-compose.yml

@@ -245,7 +245,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       checkSession: () => {
-        const { isAuthenticated, lastActivity, tokenExpiry } = get()
+        const { isAuthenticated, lastActivity, tokenExpiry, user } = get()
+        console.log('[DEBUG] checkSession:', { isAuthenticated, hasUser: !!user, lastActivity, tokenExpiry })
 
         if (!isAuthenticated) return false
 
@@ -253,6 +254,7 @@ export const useAuthStore = create<AuthState>()(
 
         // Check if token expired
         if (tokenExpiry && now >= tokenExpiry) {
+          console.log('[DEBUG] checkSession: Token expired', { now, tokenExpiry })
           get().logout()
           return false
         }

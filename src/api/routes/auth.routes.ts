@@ -4,7 +4,7 @@ import { DatabaseService } from '../../services/database-service';
 import { LogService } from '../../services/log-service';
 import { AuthService } from '../../services/auth-service';
 import { authMiddleware, AuthRequest } from '../middleware/auth.middleware';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 export function createAuthRoutes(database: DatabaseService, logger: LogService, emailService?: EmailService): Router {

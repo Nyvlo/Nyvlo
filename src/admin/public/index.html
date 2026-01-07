@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/logo_final.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nyvlo Omnichannel - Painel Administrativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+
+    /* Login */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, #128C7E 0%, #075E54 25%, #25D366 50%, #128C7E 75%, #075E54 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 60px 60px, 40px 40px;
+      opacity: 0.3;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      33% {
+        transform: translateY(-10px) rotate(1deg);
+      }
+
+      66% {
+        transform: translateY(5px) rotate(-1deg);
+      }
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #128C7E, #25D366);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-logo p {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #25D366;
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0F7A6B 0%, #20B858 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--gray-600);
+    }
+
+    .btn-ghost:hover {
+      background: var(--gray-100);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.875rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container" id="loginContainer">
+    <div class="login-box">
+      <div class="login-logo">
+        <h1>⚡ Nyvlo Omnichannel</h1>
+        <p>Painel Administrativo</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Usuário</label>
+          <input type="text" id="username" class="form-input" placeholder="Digite seu usuário" required>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="password" class="form-input" placeholder="Digite sua senha" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        <div class="error-msg" id="loginError"></div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    /* Dashboard Layout */
+    .dashboard {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 260px;
+      background: var(--gray-900);
+      padding: 1.5rem 0;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--gray-700);
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-logo h1 {
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .sidebar-logo span {
+      color: var(--gray-400);
+      font-size: 0.75rem;
+    }
+
+    .nav-section {
+      padding: 0.5rem 1rem;
+    }
+
+    .nav-section-title {
+      color: var(--gray-500);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      color: var(--gray-400);
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 0.125rem 0;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--gray-800);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      background: var(--gray-50);
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .sidebar-toggle {
+      background: none;
+      border: none;
+      color: var(--gray-600);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    .topbar h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: var(--gray-100);
+      border-radius: 8px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    /* Cards & Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-card-icon.blue {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .stat-card-icon.green {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .stat-card-icon.yellow {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .stat-card-icon.red {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .stat-label {
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Sections */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+  </style>
+
+  <style>
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+      font-size: 0.875rem;
+    }
+
+    tr:hover td {
+      background: var(--gray-50);
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    /* Forms */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    textarea.form-input {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    select.form-input {
+      cursor: pointer;
+    }
+
+    /* Menu Editor */
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--gray-50);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--gray-200);
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+      border-color: var(--primary);
+    }
+
+    .menu-item-number {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .menu-item-content {
+      flex: 1;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .menu-item-content input,
+    .menu-item-content select {
+      flex: 1;
+    }
+
+    /* Preview */
+    .phone-preview {
+      background: #075e54;
+      padding: 1rem;
+      border-radius: var(--radius);
+      max-width: 360px;
+    }
+
+    .phone-preview-header {
+      color: white;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .phone-preview-message {
+      background: #dcf8c6;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    /* Status */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+
+    .status-dot.online {
+      background: var(--success);
+    }
+
+    .status-dot.offline {
+      background: var(--danger);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        display: none;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      background: var(--gray-900);
+      color: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    /* WhatsApp Styles */
+    .instance-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .instance-card:hover {
+      border-color: var(--primary);
+    }
+
+    .instance-info {
+      flex: 1;
+    }
+
+    .instance-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .instance-phone {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+
+    .instance-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    .instance-status.connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .instance-status.connecting {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    .instance-status.disconnected {
+      background: rgba(107, 114, 128, 0.1);
+      color: #4b5563;
+    }
+
+    .instance-status.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    .instance-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* QR Code Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .qr-code {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .qr-code img {
+      max-width: 256px;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+
+  <div class="dashboard" id="dashboard">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <h1>⚡ Nyvlo Omnichannel</h1>
+        <span>Painel Administrativo</span>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-section-title">Principal</div>
+        <a class="nav-item active" data-page="dashboard">📊 Dashboard</a>
+        <a class="nav-item" data-page="whatsapp">📱 WhatsApp</a>
+        <a class="nav-item" data-page="monitoring">📈 Monitoramento</a>
+        <a class="nav-item" data-page="ai">🤖 Assistente IA</a>
+        <a class="nav-item" data-page="menus">📋 Editor de Menus</a>
+        <a class="nav-item" data-page="messages">💬 Mensagens</a>
+      </nav>
+      <nav class="nav-section">
+        <div class="nav-section-title">Conteúdo</div>
+        <a class="nav-item" data-page="courses">📚 Cursos</a>
+        <a class="nav-item" data-page="faq">❓ FAQ</a>
+      </nav>
+      <nav class="nav-section">
+        <div class="nav-section-title">Dados</div>
+        <a class="nav-item" data-page="conversations">💭 Conversas</a>
+        <a class="nav-item" data-page="appointments">📅 Agendamentos</a>
+        <a class="nav-item" data-page="enrollments">📝 Matrículas</a>
+      </nav>
+      <nav class="nav-section">
+        <div class="nav-section-title">Administração</div>
+        <a class="nav-item" data-page="users">👥 Usuários</a>
+      </nav>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" onclick="toggleSidebar()" title="Abrir/Fechar Menu">☰</button>
+          <h2 id="pageTitle">Nyvlo Omnichannel Dashboard</h2>
+        </div>
+        <div class="topbar-actions">
+          <div id="connectionStatus"><span class="status-dot online"></span>Conectado</div>
+          <div class="user-menu">
+            <div class="user-avatar">A</div>
+            <span>Admin</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">Sair</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="fade-in">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon blue">💬</div>
+              </div>
+              <div class="stat-value" id="statConversations">0</div>
+              <div class="stat-label">Conversas Hoje</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon green">📅</div>
+              </div>
+              <div class="stat-value" id="statAppointments">0</div>
+              <div class="stat-label">Agendamentos Hoje</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon yellow">📝</div>
+              </div>
+              <div class="stat-value" id="statEnrollments">0</div>
+              <div class="stat-label">Matrículas Pendentes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon red">👥</div>
+              </div>
+              <div class="stat-value" id="statUsers">0</div>
+              <div class="stat-label">Total de Usuários</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Ações Rápidas</h3>
+            </div>
+            <div class="card-body" style="display:flex;gap:1rem;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="createBackup()">📦 Criar Backup</button>
+              <button class="btn btn-success" onclick="exportLeads()">📊 Exportar Leads</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Page -->
+        <div id="aiPage" style="display:none" class="fade-in">
+          <div class="stats-grid" style="margin-bottom:1.5rem">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon blue">🤖</div>
+              </div>
+              <div class="stat-value" id="aiStatusValue">Desabilitado</div>
+              <div class="stat-label">Status da IA</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon green">⚡</div>
+              </div>
+              <div class="stat-value" id="aiProviderValue">-</div>
+              <div class="stat-label">Provedor</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon yellow">🧠</div>
+              </div>
+              <div class="stat-value" id="aiModelValue">-</div>
+              <div class="stat-label">Modelo</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>🤖 Configuração do Assistente IA</h3>
+              <div id="aiStatus" class="badge badge-danger">Desabilitado</div>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Habilitar IA</label>
+                  <select id="aiEnabled" class="form-input" onchange="updateAIConfig()">
+                    <option value="false">Desabilitado</option>
+                    <option value="true">Habilitado</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Provedor</label>
+                  <select id="aiProvider" class="form-input" onchange="updateAIConfig()">
+                    <option value="groq">Groq (Recomendado - Grátis)</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic</option>
+                    <option value="ollama">Ollama (Local)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Modelo</label>
+                  <select id="aiModel" class="form-input" onchange="updateAIConfig()">
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq)</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo (OpenAI)</option>
+                    <option value="gpt-4">GPT-4 (OpenAI)</option>
+                    <option value="claude-3-haiku-20240307">Claude 3 Haiku (Anthropic)</option>
+                    <option value="llama2">Llama 2 (Ollama)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>API Key</label>
+                  <input type="password" id="aiApiKey" class="form-input" placeholder="Sua chave da API"
+                    onchange="updateAIConfig()">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Temperatura (0-1)</label>
+                  <input type="number" id="aiTemperature" class="form-input" min="0" max="1" step="0.1" value="0.7"
+                    onchange="updateAIConfig()">
+                </div>
+                <div class="form-group">
+                  <label>Max Tokens</label>
+                  <input type="number" id="aiMaxTokens" class="form-input" min="100" max="2000" value="500"
+                    onchange="updateAIConfig()">
+                </div>
+              </div>
+              <div class="form-group" id="aiBaseUrlGroup" style="display:none">
+                <label>URL Base (Ollama)</label>
+                <input type="url" id="aiBaseUrl" class="form-input" placeholder="http://localhost:11434"
+                  onchange="updateAIConfig()">
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-success" onclick="saveAIConfig()">💾 Salvar Configuração</button>
+              <button class="btn btn-primary" onclick="testAI()" style="margin-left:1rem">🧪 Testar IA</button>
+              <span id="aiSaveStatus" style="margin-left:1rem;font-size:0.875rem"></span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>📋 Como Configurar</h3>
+            </div>
+            <div class="card-body">
+              <h4>🚀 Groq (Recomendado - Grátis)</h4>
+              <p>1. Acesse <a href="https://console.groq.com" target="_blank">console.groq.com</a></p>
+              <p>2. Crie uma conta gratuita</p>
+              <p>3. Gere uma API Key</p>
+              <p>4. Cole a chave acima e salve</p>
+              <br>
+              <h4>🤖 OpenAI</h4>
+              <p>1. Acesse <a href="https://platform.openai.com" target="_blank">platform.openai.com</a></p>
+              <p>2. Crie uma API Key (pago)</p>
+              <br>
+              <h4>🏠 Ollama (Local)</h4>
+              <p>1. Instale Ollama no seu servidor</p>
+              <p>2. Execute: <code>ollama pull llama2</code></p>
+              <p>3. Configure a URL base</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>🧠 Como Funciona a IA</h3>
+            </div>
+            <div class="card-body">
+              <h4>🎯 Funcionalidades</h4>
+              <ul>
+                <li><strong>Atendimento Natural:</strong> Responde perguntas em linguagem natural</li>
+                <li><strong>Reconhecimento de Intenções:</strong> Identifica o que o usuário quer</li>
+                <li><strong>Escalação Inteligente:</strong> Transfere para humano quando necessário</li>
+                <li><strong>Contexto de Conversa:</strong> Lembra do histórico da conversa</li>
+              </ul>
+              <br>
+              <h4>⚙️ Configurações</h4>
+              <ul>
+                <li><strong>Temperatura:</strong> Controla criatividade (0.1 = conservador, 0.9 = criativo)</li>
+                <li><strong>Max Tokens:</strong> Limite de palavras na resposta</li>
+                <li><strong>Modelo:</strong> Diferentes modelos têm diferentes capacidades</li>
+              </ul>
+              <br>
+              <h4>📊 Ações da IA</h4>
+              <ul>
+                <li><strong>Continue:</strong> Continua a conversa normalmente</li>
+                <li><strong>Transfer:</strong> Transfere para atendente humano</li>
+                <li><strong>Menu:</strong> Mostra o menu principal</li>
+                <li><strong>Appointment:</strong> Inicia agendamento</li>
+                <li><strong>Enrollment:</strong> Inicia matrícula</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitoring Page -->
+        <div id="monitoringPage" style="display:none" class="fade-in">
+          <div class="stats-grid" style="margin-bottom:1.5rem">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon blue">📊</div>
+              </div>
+              <div class="stat-value" id="systemUptime">0h</div>
+              <div class="stat-label">Tempo Online</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon green">💾</div>
+              </div>
+              <div class="stat-value" id="memoryUsage">0MB</div>
+              <div class="stat-label">Uso de Memória</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon yellow">⚡</div>
+              </div>
+              <div class="stat-value" id="responseTime">0ms</div>
+              <div class="stat-label">Tempo de Resposta</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon red">🚨</div>
+              </div>
+              <div class="stat-value" id="errorCount">0</div>
+              <div class="stat-label">Erros (24h)</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+            <div class="card">
+              <div class="card-header">
+                <h3>📈 Métricas do Sistema</h3>
+                <button class="btn btn-primary btn-sm" onclick="refreshMetrics()">🔄 Atualizar</button>
+              </div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                  <div>
+                    <strong>Mensagens Recebidas:</strong>
+                    <div id="metricsReceived" style="font-size:1.5rem;color:var(--primary)">0</div>
+                  </div>
+                  <div>
+                    <strong>Mensagens Processadas:</strong>
+                    <div id="metricsProcessed" style="font-size:1.5rem;color:var(--success)">0</div>
+                  </div>
+                  <div>
+                    <strong>Respostas da IA:</strong>
+                    <div id="metricsAI" style="font-size:1.5rem;color:var(--warning)">0</div>
+                  </div>
+                  <div>
+                    <strong>Transferências Humanas:</strong>
+                    <div id="metricsTransfers" style="font-size:1.5rem;color:var(--danger)">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>💾 Cache</h3>
+                <button class="btn btn-danger btn-sm" onclick="clearSystemCache()">🗑️ Limpar</button>
+              </div>
+              <div class="card-body">
+                <div>
+                  <strong>Entradas no Cache:</strong>
+                  <div id="cacheSize" style="font-size:1.5rem;color:var(--primary)">0</div>
+                </div>
+                <div style="margin-top:1rem">
+                  <strong>Taxa de Acerto:</strong>
+                  <div id="cacheHitRate" style="font-size:1.5rem;color:var(--success)">0%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>🏥 Status de Saúde do Sistema</h3>
+              <div id="systemHealthStatus" class="badge badge-success">Saudável</div>
+            </div>
+            <div class="card-body">
+              <div id="healthChecks" style="display:grid;gap:1rem">
+                <!-- Health checks will be populated here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>💾 Backups Automáticos</h3>
+              <button class="btn btn-primary btn-sm" onclick="createManualBackup()">📦 Criar Backup</button>
+            </div>
+            <div class="card-body">
+              <div id="backupsList">
+                <!-- Backups list will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Page -->
+        <div id="whatsappPage" style="display:none" class="fade-in">
+          <div class="stats-grid" style="margin-bottom:1.5rem">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon blue">📱</div>
+              </div>
+              <div class="stat-value" id="whatsappTotal">0</div>
+              <div class="stat-label">Total de Instâncias</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon green">✅</div>
+              </div>
+              <div class="stat-value" id="whatsappConnected">0</div>
+              <div class="stat-label">Conectadas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon yellow">🔄</div>
+              </div>
+              <div class="stat-value" id="whatsappConnecting">0</div>
+              <div class="stat-label">Conectando</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon red">❌</div>
+              </div>
+              <div class="stat-value" id="whatsappDisconnected">0</div>
+              <div class="stat-label">Desconectadas</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📱 Gerenciar Instâncias WhatsApp</h3>
+              <button class="btn btn-primary" onclick="showCreateInstanceModal()">➕ Nova Instância</button>
+            </div>
+            <div class="card-body">
+              <div id="whatsappInstancesList">
+                <!-- Instances will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menus Page -->
+        <div id="menusPage" style="display:none" class="fade-in">
+          <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem">
+            <div class="card">
+              <div class="card-header">
+                <h3>Itens do Menu</h3>
+                <button class="btn btn-primary btn-sm" onclick="addMenuItem()">+ Adicionar</button>
+              </div>
+              <div class="card-body" id="menuEditor"></div>
+              <div class="card-footer">
+                <button class="btn btn-success" onclick="saveMenus()">💾 Salvar Alterações</button>
+                <span id="menuSaveStatus" style="margin-left:1rem;font-size:0.875rem"></span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3>Pré-visualização</h3>
+              </div>
+              <div class="card-body">
+                <div class="phone-preview">
+                  <div class="phone-preview-header">WhatsApp Preview</div>
+                  <div class="phone-preview-message" id="menuPreview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Page -->
+        <div id="messagesPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Mensagens Automáticas</h3>
+            </div>
+            <div class="card-body" id="messagesEditor"></div>
+            <div class="card-footer">
+              <button class="btn btn-success" onclick="saveMessages()">💾 Salvar Mensagens</button>
+              <span id="messageSaveStatus" style="margin-left:1rem;font-size:0.875rem"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courses Page -->
+        <div id="coursesPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Cursos Disponíveis</h3>
+              <button class="btn btn-primary btn-sm" onclick="addCourse()">+ Novo Curso</button>
+            </div>
+            <div class="card-body" id="coursesEditor"></div>
+            <div class="card-footer">
+              <button class="btn btn-success" onclick="saveCourses()">💾 Salvar Cursos</button>
+              <span id="courseSaveStatus" style="margin-left:1rem;font-size:0.875rem"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Page -->
+        <div id="faqPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Perguntas Frequentes</h3>
+              <button class="btn btn-primary btn-sm" onclick="addFAQ()">+ Nova Pergunta</button>
+            </div>
+            <div class="card-body" id="faqEditor"></div>
+            <div class="card-footer">
+              <button class="btn btn-success" onclick="saveFAQ()">💾 Salvar FAQ</button>
+              <span id="faqSaveStatus" style="margin-left:1rem;font-size:0.875rem"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversations Page -->
+        <div id="conversationsPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Conversas Recentes</h3>
+            </div>
+            <div class="card-body table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Mensagem</th>
+                    <th>Direção</th>
+                    <th>Data/Hora</th>
+                  </tr>
+                </thead>
+                <tbody id="conversationsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointments Page -->
+        <div id="appointmentsPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Agendamentos</h3>
+            </div>
+            <div class="card-body table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Data/Hora</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="appointmentsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enrollments Page -->
+        <div id="enrollmentsPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>Pré-Matrículas</h3>
+            </div>
+            <div class="card-body table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Protocolo</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Curso</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody id="enrollmentsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Page -->
+        <div id="usersPage" style="display:none" class="fade-in">
+          <div class="card">
+            <div class="card-header">
+              <h3>👥 Gerenciar Usuários</h3>
+              <button class="btn btn-primary btn-sm" onclick="showCreateUserModal()">➕ Novo Usuário</button>
+            </div>
+            <div class="card-body table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Função</th>
+                    <th>Status</th>
+                    <th>Último Acesso</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <!-- Create Instance Modal -->
+  <div id="createInstanceModal" class="modal">
+    <div class="modal-content">
+      <h3>➕ Nova Instância WhatsApp</h3>
+      <div class="form-group">
+        <label>Nome da Instância</label>
+        <input type="text" id="instanceName" class="form-input" placeholder="Ex: Atendimento Principal">
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:1.5rem">
+        <button class="btn btn-primary" onclick="createInstance()">Criar</button>
+        <button class="btn btn-ghost" onclick="hideCreateInstanceModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <h3>📱 Escaneie o QR Code</h3>
+      <p>Use o WhatsApp do seu celular para escanear o código:</p>
+      <div class="qr-code" id="qrCodeContainer">
+        <div>Gerando QR Code...</div>
+      </div>
+      <button class="btn btn-ghost" onclick="hideQRModal()">Fechar</button>
+    </div>
+  </div>
+
+  <!-- User Modal -->
+  <div id="userModal" class="modal">
+    <div class="modal-content" style="max-width:500px">
+      <h3 id="userModalTitle">➕ Novo Usuário</h3>
+      <form id="userForm" onsubmit="saveUser(event)">
+        <input type="hidden" id="userId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome de Usuário *</label>
+            <input type="text" id="userUsername" class="form-input" placeholder="Digite o username" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="userEmail" class="form-input" placeholder="email@exemplo.com">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome Completo *</label>
+            <input type="text" id="userName" class="form-input" placeholder="Nome completo" required>
+          </div>
+          <div class="form-group">
+            <label id="userPasswordLabel">Senha *</label>
+            <input type="password" id="userPassword" class="form-input" placeholder="Digite a senha">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Função *</label>
+            <select id="userRole" class="form-input">
+              <option value="agent">Agente</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="userActive" class="form-input">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="instancesGroup">
+          <label>Instâncias WhatsApp Permitidas</label>
+          <div id="instancesCheckboxes"
+            style="max-height:150px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:0.75rem">
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem">
+          <button type="submit" class="btn btn-primary">💾 Salvar</button>
+          <button type="button" class="btn btn-ghost" onclick="hideUserModal()">Cancelar</button>
+        </div>
+        <div id="userError" class="error-msg" style="margin-top:1rem"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let config = null;
+    let sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    const pageTitles = { dashboard: 'Nyvlo Omnichannel Dashboard', whatsapp: 'Gerenciar WhatsApp', monitoring: 'Monitoramento do Sistema', ai: 'Assistente IA', menus: 'Editor de Menus', messages: 'Mensagens', courses: 'Cursos', faq: 'FAQ', conversations: 'Conversas', appointments: 'Agendamentos', enrollments: 'Matrículas', users: 'Gerenciar Usuários' };
+    let allInstances = [];
+
+    if (token) showDashboard();
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('sidebarOverlay');
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('show');
+      } else {
+        sidebarCollapsed = !sidebarCollapsed;
+        sidebar.classList.toggle('collapsed', sidebarCollapsed);
+        mainContent.classList.toggle('expanded', sidebarCollapsed);
+        localStorage.setItem('sidebarCollapsed', sidebarCollapsed);
+      }
+    }
+
+    function initSidebar() {
+      if (sidebarCollapsed && window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.add('collapsed');
+        document.getElementById('mainContent').classList.add('expanded');
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('show');
+        sidebar.classList.toggle('collapsed', sidebarCollapsed);
+        mainContent.classList.toggle('expanded', sidebarCollapsed);
+      } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('expanded');
+      }
+    });
+
+    // Aggressive redirect to unified web interface (Vite port 3000)
+    if (token) {
+      window.location.href = 'http://localhost:3000/dashboard';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+        const data = await res.json();
+        if (res.ok) {
+          token = data.token;
+          localStorage.setItem('token', token);
+
+          // Redirect everyone to the new unified web interface (Vite port 3000)
+          window.location.href = 'http://localhost:3000/dashboard';
+          return;
+
+          showDashboard();
+        }
+        else { document.getElementById('loginError').textContent = data.error; }
+      } catch (err) { document.getElementById('loginError').textContent = 'Erro de conexão'; }
+    });
+
+    function showDashboard() {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      initSidebar();
+
+      // Decode JWT to get user role and show/hide admin menu
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role || 'admin'; // Legacy admins don't have role, treat as admin
+        const usersNavItem = document.querySelector('[data-page="users"]');
+        if (usersNavItem) {
+          usersNavItem.style.display = userRole === 'admin' ? 'flex' : 'none';
+        }
+        // Update user menu display
+        const userAvatar = document.querySelector('.user-avatar');
+        const userNameSpan = document.querySelector('.user-menu span');
+        if (userAvatar && payload.username) {
+          userAvatar.textContent = payload.username.charAt(0).toUpperCase();
+        }
+        if (userNameSpan && payload.username) {
+          userNameSpan.textContent = payload.username;
+        }
+      } catch (e) {
+        console.error('Erro ao decodificar token:', e);
+      }
+
+      loadDashboard();
+      loadConfig();
+    }
+
+    function logout() { localStorage.removeItem('token'); location.reload(); }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function api(endpoint, options = {}) {
+      const res = await fetch(endpoint, { ...options, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...options.headers } });
+      if (res.status === 401) { logout(); return null; }
+      return res.json();
+    }
+
+    async function loadConfig() {
+      config = await api('/api/config');
+      if (!config.menus) {
+        config.menus = [
+          { id: '1', title: '📚 Informações sobre Cursos', action: 'courses' },
+          { id: '2', title: '📅 Agendar Visita', action: 'appointment' },
+          { id: '3', title: '📝 Fazer Pré-Matrícula', action: 'enrollment' },
+          { id: '4', title: '❓ Perguntas Frequentes', action: 'faq' },
+          { id: '5', title: '📍 Localização e Contato', action: 'contact' },
+          { id: '6', title: '👤 Falar com Atendente', action: 'human' }
+        ];
+      }
+      renderMenuEditor();
+      renderMessagesEditor();
+      renderCoursesEditor();
+      renderFAQEditor();
+      renderAIConfig();
+    }
+
+    // Menu Editor
+    function renderMenuEditor() {
+      const container = document.getElementById('menuEditor');
+      container.innerHTML = config.menus.map((item, i) => `
+        <div class="menu-item">
+          <div class="menu-item-number">${i + 1}</div>
+          <div class="menu-item-content">
+            <input type="text" class="form-input" value="${item.title}" onchange="updateMenuItem(${i},'title',this.value)" placeholder="Título do item">
+            <select class="form-input" onchange="updateMenuItem(${i},'action',this.value)" style="max-width:180px">
+              <option value="courses" ${item.action === 'courses' ? 'selected' : ''}>Cursos</option>
+              <option value="appointment" ${item.action === 'appointment' ? 'selected' : ''}>Agendamento</option>
+              <option value="enrollment" ${item.action === 'enrollment' ? 'selected' : ''}>Matrícula</option>
+              <option value="faq" ${item.action === 'faq' ? 'selected' : ''}>FAQ</option>
+              <option value="contact" ${item.action === 'contact' ? 'selected' : ''}>Contato</option>
+              <option value="human" ${item.action === 'human' ? 'selected' : ''}>Atendente</option>
+            </select>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="removeMenuItem(${i})">🗑️</button>
+        </div>
+      `).join('');
+      updateMenuPreview();
+    }
+
+    function addMenuItem() { config.menus.push({ id: Date.now().toString(), title: 'Novo Item', action: 'custom' }); renderMenuEditor(); }
+    function updateMenuItem(i, f, v) { config.menus[i][f] = v; updateMenuPreview(); }
+    function removeMenuItem(i) { config.menus.splice(i, 1); renderMenuEditor(); }
+
+    function updateMenuPreview() {
+      const welcome = config.messages?.welcome?.replace('{empresa}', config.company?.name || 'Empresa') || 'Olá! Bem-vindo!';
+      let text = welcome + '\n\nEscolha uma opção:\n\n';
+      config.menus.forEach((item, i) => { text += `${i + 1}. ${item.title}\n`; });
+      document.getElementById('menuPreview').textContent = text;
+    }
+
+    async function saveMenus() {
+      const res = await api('/api/config', { method: 'PUT', body: JSON.stringify({ menus: config.menus }) });
+      if (res?.success) showToast('Menus salvos com sucesso!');
+      else showToast('Erro ao salvar', 'error');
+    }
+
+    // Messages Editor
+    function renderMessagesEditor() {
+      const msgs = config.messages || {};
+      const labels = { welcome: 'Mensagem de Boas-vindas', goodbye: 'Despedida', invalidOption: 'Opção Inválida', outsideHours: 'Fora do Horário', transferToHuman: 'Transferência para Atendente', noHumanAvailable: 'Atendente Indisponível', appointmentConfirmation: 'Confirmação de Agendamento', enrollmentComplete: 'Matrícula Concluída' };
+      document.getElementById('messagesEditor').innerHTML = Object.entries(labels).map(([key, label]) => `
+        <div class="form-group">
+          <label>${label}</label>
+          <textarea id="msg_${key}" class="form-input">${msgs[key] || ''}</textarea>
+        </div>
+      `).join('');
+    }
+
+    async function saveMessages() {
+      const messages = {};
+      ['welcome', 'goodbye', 'invalidOption', 'outsideHours', 'transferToHuman', 'noHumanAvailable', 'appointmentConfirmation', 'enrollmentComplete'].forEach(k => { messages[k] = document.getElementById('msg_' + k).value; });
+      const res = await api('/api/config', { method: 'PUT', body: JSON.stringify({ messages }) });
+      config.messages = messages;
+      if (res?.success) showToast('Mensagens salvas!');
+      else showToast('Erro ao salvar', 'error');
+    }
+
+    // Courses Editor
+    function renderCoursesEditor() {
+      document.getElementById('coursesEditor').innerHTML = (config.courses || []).map((c, i) => `
+        <div class="card" style="margin-bottom:1rem;box-shadow:none;border:1px solid var(--gray-200)">
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group"><label>Nome do Curso</label><input type="text" class="form-input" value="${c.name}" onchange="updateCourse(${i},'name',this.value)"></div>
+              <div class="form-group"><label>Preço (R$)</label><input type="number" class="form-input" value="${c.price}" onchange="updateCourse(${i},'price',parseFloat(this.value))"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Duração</label><input type="text" class="form-input" value="${c.duration}" onchange="updateCourse(${i},'duration',this.value)"></div>
+              <div class="form-group"><label>Carga Horária</label><input type="text" class="form-input" value="${c.workload}" onchange="updateCourse(${i},'workload',this.value)"></div>
+            </div>
+            <div class="form-group"><label>Descrição</label><textarea class="form-input" onchange="updateCourse(${i},'description',this.value)">${c.description}</textarea></div>
+            <button class="btn btn-danger btn-sm" onclick="removeCourse(${i})">🗑️ Remover Curso</button>
+          </div>
+        </div>
+      `).join('') || '<p style="color:var(--gray-500)">Nenhum curso cadastrado.</p>';
+    }
+
+    function addCourse() { config.courses.push({ id: 'curso-' + Date.now(), name: 'Novo Curso', description: '', duration: '1 mês', workload: '40 horas', price: 0, prerequisites: [], documents: [], active: true }); renderCoursesEditor(); }
+    function updateCourse(i, f, v) { config.courses[i][f] = v; }
+    function removeCourse(i) { config.courses.splice(i, 1); renderCoursesEditor(); }
+    async function saveCourses() { const res = await api('/api/config', { method: 'PUT', body: JSON.stringify({ courses: config.courses }) }); if (res?.success) showToast('Cursos salvos!'); else showToast('Erro', 'error'); }
+
+    // FAQ Editor
+    function renderFAQEditor() {
+      const questions = config.faq?.questions || [];
+      document.getElementById('faqEditor').innerHTML = questions.map((q, i) => `
+        <div class="card" style="margin-bottom:1rem;box-shadow:none;border:1px solid var(--gray-200)">
+          <div class="card-body">
+            <div class="form-group"><label>Pergunta</label><input type="text" class="form-input" value="${q.question}" onchange="updateFAQ(${i},'question',this.value)"></div>
+            <div class="form-group"><label>Resposta</label><textarea class="form-input" onchange="updateFAQ(${i},'answer',this.value)">${q.answer}</textarea></div>
+            <button class="btn btn-danger btn-sm" onclick="removeFAQ(${i})">🗑️ Remover</button>
+          </div>
+        </div>
+      `).join('') || '<p style="color:var(--gray-500)">Nenhuma pergunta cadastrada.</p>';
+    }
+
+    function addFAQ() { if (!config.faq) config.faq = { categories: [], questions: [] }; config.faq.questions.push({ id: 'q' + Date.now(), categoryId: 'cursos', question: 'Nova pergunta?', answer: 'Resposta', keywords: [], order: config.faq.questions.length + 1 }); renderFAQEditor(); }
+    function updateFAQ(i, f, v) { config.faq.questions[i][f] = v; }
+    function removeFAQ(i) { config.faq.questions.splice(i, 1); renderFAQEditor(); }
+    async function saveFAQ() { const res = await api('/api/config', { method: 'PUT', body: JSON.stringify({ faq: config.faq }) }); if (res?.success) showToast('FAQ salvo!'); else showToast('Erro', 'error'); }
+
+    // AI Configuration
+    function renderAIConfig() {
+      const ai = config.ai || { provider: 'groq', model: 'llama-3.1-8b-instant', maxTokens: 500, temperature: 0.7, enabled: false };
+      document.getElementById('aiEnabled').value = ai.enabled.toString();
+      document.getElementById('aiProvider').value = ai.provider;
+      document.getElementById('aiModel').value = ai.model;
+      document.getElementById('aiApiKey').value = ai.apiKey || '';
+      document.getElementById('aiTemperature').value = ai.temperature;
+      document.getElementById('aiMaxTokens').value = ai.maxTokens;
+      document.getElementById('aiBaseUrl').value = ai.baseUrl || '';
+      updateAIStatus();
+      updateAIProviderFields();
+    }
+
+    function updateAIConfig() {
+      if (!config.ai) config.ai = {};
+      config.ai.enabled = document.getElementById('aiEnabled').value === 'true';
+      config.ai.provider = document.getElementById('aiProvider').value;
+      config.ai.model = document.getElementById('aiModel').value;
+      config.ai.apiKey = document.getElementById('aiApiKey').value;
+      config.ai.temperature = parseFloat(document.getElementById('aiTemperature').value);
+      config.ai.maxTokens = parseInt(document.getElementById('aiMaxTokens').value);
+      config.ai.baseUrl = document.getElementById('aiBaseUrl').value;
+      updateAIStatus();
+      updateAIProviderFields();
+    }
+
+    function updateAIStatus() {
+      const status = document.getElementById('aiStatus');
+      const enabled = config.ai?.enabled && config.ai?.apiKey;
+      status.className = enabled ? 'badge badge-success' : 'badge badge-danger';
+      status.textContent = enabled ? 'Habilitado' : 'Desabilitado';
+
+      // Update stats cards
+      document.getElementById('aiStatusValue').textContent = enabled ? 'Ativo' : 'Inativo';
+      document.getElementById('aiProviderValue').textContent = config.ai?.provider?.toUpperCase() || '-';
+      document.getElementById('aiModelValue').textContent = config.ai?.model || '-';
+    }
+
+    function updateAIProviderFields() {
+      const provider = document.getElementById('aiProvider').value;
+      const baseUrlGroup = document.getElementById('aiBaseUrlGroup');
+      const modelSelect = document.getElementById('aiModel');
+
+      baseUrlGroup.style.display = provider === 'ollama' ? 'block' : 'none';
+
+      // Update model options based on provider
+      const models = {
+        groq: [
+          { value: 'llama-3.1-8b-instant', text: 'Llama 3.1 8B (Rápido)' },
+          { value: 'llama-3.1-70b-versatile', text: 'Llama 3.1 70B (Melhor)' }
+        ],
+        openai: [
+          { value: 'gpt-3.5-turbo', text: 'GPT-3.5 Turbo' },
+          { value: 'gpt-4', text: 'GPT-4' },
+          { value: 'gpt-4-turbo', text: 'GPT-4 Turbo' }
+        ],
+        anthropic: [
+          { value: 'claude-3-haiku-20240307', text: 'Claude 3 Haiku' },
+          { value: 'claude-3-sonnet-20240229', text: 'Claude 3 Sonnet' }
+        ],
+        ollama: [
+          { value: 'llama2', text: 'Llama 2' },
+          { value: 'mistral', text: 'Mistral' },
+          { value: 'codellama', text: 'Code Llama' }
+        ]
+      };
+
+      modelSelect.innerHTML = models[provider].map(m => `<option value="${m.value}">${m.text}</option>`).join('');
+    }
+
+    async function saveAIConfig() {
+      const res = await api('/api/config', { method: 'PUT', body: JSON.stringify({ ai: config.ai }) });
+      if (res?.success) showToast('Configuração da IA salva! Reinicie o bot para aplicar.');
+      else showToast('Erro ao salvar', 'error');
+    }
+
+    async function testAI() {
+      if (!config.ai?.enabled || !config.ai?.apiKey) {
+        showToast('Configure a IA primeiro!', 'error');
+        return;
+      }
+
+      const testMessage = prompt('Digite uma mensagem para testar a IA:');
+      if (!testMessage) return;
+
+      showToast('Testando IA...', 'info');
+
+      try {
+        const res = await api('/api/test-ai', {
+          method: 'POST',
+          body: JSON.stringify({ message: testMessage })
+        });
+
+        if (res?.success) {
+          const result = `✅ Teste da IA realizado com sucesso!
+
+📝 Mensagem: ${testMessage}
+🤖 Resposta: ${res.response}
+🎯 Ação: ${res.action}
+📊 Confiança: ${(res.confidence * 100).toFixed(1)}%
+${res.intent ? `🧠 Intenção: ${res.intent}` : ''}`;
+
+          alert(result);
+          showToast('IA testada com sucesso!');
+        } else {
+          showToast('Erro no teste: ' + (res?.error || 'Erro desconhecido'), 'error');
+        }
+      } catch (error) {
+        showToast('Erro ao testar IA: ' + error.message, 'error');
+      }
+    }
+
+    // Monitoring Functions
+    async function refreshMetrics() {
+      try {
+        const metrics = await api('/api/metrics');
+        if (metrics) {
+          document.getElementById('metricsReceived').textContent = metrics.messagesReceived || 0;
+          document.getElementById('metricsProcessed').textContent = metrics.messagesProcessed || 0;
+          document.getElementById('metricsAI').textContent = metrics.aiResponses || 0;
+          document.getElementById('metricsTransfers').textContent = metrics.humanTransfers || 0;
+
+          // Update system stats
+          const uptimeHours = Math.floor(metrics.uptime / 3600);
+          document.getElementById('systemUptime').textContent = uptimeHours + 'h';
+
+          if (metrics.memory) {
+            const memoryMB = Math.round(metrics.memory.rss / 1024 / 1024);
+            document.getElementById('memoryUsage').textContent = memoryMB + 'MB';
+          }
+
+          document.getElementById('responseTime').textContent = '< 1s';
+          document.getElementById('errorCount').textContent = metrics.errors || 0;
+        }
+      } catch (error) {
+        showToast('Erro ao carregar métricas', 'error');
+      }
+    }
+
+    async function loadCacheStats() {
+      try {
+        const stats = await api('/api/cache/stats');
+        if (stats) {
+          document.getElementById('cacheSize').textContent = stats.size || 0;
+          document.getElementById('cacheHitRate').textContent = ((stats.hitRate || 0) * 100).toFixed(1) + '%';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas do cache:', error);
+      }
+    }
+
+    async function clearSystemCache() {
+      if (!confirm('Tem certeza que deseja limpar o cache? Isso pode afetar a performance temporariamente.')) {
+        return;
+      }
+
+      try {
+        const result = await api('/api/cache/clear', { method: 'POST' });
+        if (result?.success) {
+          showToast('Cache limpo com sucesso!');
+          loadCacheStats();
+        } else {
+          showToast('Erro ao limpar cache', 'error');
+        }
+      } catch (error) {
+        showToast('Erro ao limpar cache', 'error');
+      }
+    }
+
+    async function loadHealthStatus() {
+      try {
+        const health = await api('/api/health');
+        if (health) {
+          const statusElement = document.getElementById('systemHealthStatus');
+          statusElement.className = `badge badge-${health.status === 'healthy' ? 'success' : health.status === 'degraded' ? 'warning' : 'danger'}`;
+          statusElement.textContent = health.status === 'healthy' ? 'Saudável' : health.status === 'degraded' ? 'Degradado' : 'Não Saudável';
+
+          // Update health checks if available
+          if (health.checks) {
+            const checksContainer = document.getElementById('healthChecks');
+            checksContainer.innerHTML = health.checks.map(check => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem;background:var(--gray-50);border-radius:6px">
+                <span><strong>${check.name}:</strong> ${check.message}</span>
+                <span class="badge badge-${check.status === 'healthy' ? 'success' : check.status === 'degraded' ? 'warning' : 'danger'}">${check.status}</span>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar status de saúde:', error);
+      }
+    }
+
+    async function loadBackups() {
+      try {
+        const backups = await api('/api/backups');
+        if (backups) {
+          const backupsContainer = document.getElementById('backupsList');
+          if (backups.length === 0) {
+            backupsContainer.innerHTML = '<p style="color:var(--gray-500)">Nenhum backup encontrado.</p>';
+          } else {
+            backupsContainer.innerHTML = backups.map(backup => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border:1px solid var(--gray-200);border-radius:6px;margin-bottom:0.5rem">
+                <div>
+                  <strong>${backup.name}</strong>
+                  <div style="font-size:0.875rem;color:var(--gray-500)">
+                    ${(backup.size / 1024 / 1024).toFixed(2)} MB - ${new Date(backup.created).toLocaleString('pt-BR')}
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="downloadBackup('${backup.name}')">📥 Download</button>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar backups:', error);
+      }
+    }
+
+    async function createManualBackup() {
+      try {
+        showToast('Criando backup...', 'info');
+        const result = await api('/api/backup', { method: 'POST' });
+        if (result?.success) {
+          showToast('Backup criado com sucesso!');
+          loadBackups();
+        } else {
+          showToast('Erro ao criar backup', 'error');
+        }
+      } catch (error) {
+        showToast('Erro ao criar backup', 'error');
+      }
+    }
+
+    function downloadBackup(backupName) {
+      window.open(`/api/backups/${backupName}?token=${token}`, '_blank');
+    }
+
+    // Data Loading
+    async function loadDashboard() {
+      const stats = await api('/api/dashboard');
+      if (stats) {
+        document.getElementById('statConversations').textContent = stats.conversationsToday;
+        document.getElementById('statAppointments').textContent = stats.appointmentsToday;
+        document.getElementById('statEnrollments').textContent = stats.enrollmentsPending;
+        document.getElementById('statUsers').textContent = stats.totalUsers;
+      }
+    }
+
+    async function loadConversations() {
+      const data = await api('/api/conversations');
+      if (data) {
+        document.getElementById('conversationsTable').innerHTML = data.length ? data.map(c => `
+          <tr><td>${c.user_name || c.user_id}</td><td>${(c.message || '').substring(0, 60)}${c.message?.length > 60 ? '...' : ''}</td><td>${c.direction === 'in' ? '📥 Recebida' : '📤 Enviada'}</td><td>${new Date(c.timestamp).toLocaleString('pt-BR')}</td></tr>
+        `).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--gray-500)">Nenhuma conversa encontrada</td></tr>';
+      }
+    }
+
+    async function loadAppointments() {
+      const data = await api('/api/appointments');
+      if (data) {
+        const statusMap = { pending: 'warning', confirmed: 'success', cancelled: 'danger' };
+        document.getElementById('appointmentsTable').innerHTML = data.length ? data.map(a => `
+          <tr><td>${a.code}</td><td>${a.name}</td><td>${a.phone}</td><td>${new Date(a.scheduled_at).toLocaleString('pt-BR')}</td><td><span class="badge badge-${statusMap[a.status] || 'warning'}">${a.status}</span></td></tr>
+        `).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--gray-500)">Nenhum agendamento encontrado</td></tr>';
+      }
+    }
+
+    async function loadEnrollments() {
+      const data = await api('/api/enrollments');
+      if (data) {
+        const statusMap = { pending: 'warning', approved: 'success', rejected: 'danger' };
+        document.getElementById('enrollmentsTable').innerHTML = data.length ? data.map(e => `
+          <tr><td>${e.protocol}</td><td>${e.full_name}</td><td>${e.cpf}</td><td>${e.course_id}</td><td><span class="badge badge-${statusMap[e.status] || 'warning'}">${e.status}</span></td><td>${new Date(e.created_at).toLocaleDateString('pt-BR')}</td></tr>
+        `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--gray-500)">Nenhuma matrícula encontrada</td></tr>';
+      }
+    }
+
+    async function createBackup() {
+      const res = await api('/api/backup', { method: 'POST' });
+      if (res?.success) showToast('Backup criado: ' + res.path);
+      else showToast('Erro ao criar backup', 'error');
+    }
+
+    function exportLeads() { window.open('/api/export/leads?token=' + token, '_blank'); }
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.target.dataset.page;
+        document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+        document.querySelectorAll('[id$="Page"]').forEach(p => p.style.display = 'none');
+        const pageEl = document.getElementById(page + 'Page');
+        if (pageEl) { pageEl.style.display = 'block'; pageEl.classList.add('fade-in'); }
+        document.getElementById('pageTitle').textContent = pageTitles[page] || page;
+        if (page === 'dashboard') loadDashboard();
+        if (page === 'whatsapp') {
+          loadWhatsAppInstances();
+          loadWhatsAppStats();
+        }
+        if (page === 'monitoring') {
+          refreshMetrics();
+          loadCacheStats();
+          loadHealthStatus();
+          loadBackups();
+        }
+        if (page === 'conversations') loadConversations();
+        if (page === 'appointments') loadAppointments();
+        if (page === 'enrollments') loadEnrollments();
+        if (page === 'users') loadUsers();
+      });
+    });
+
+    // WhatsApp Management Functions
+    let whatsappInstances = [];
+    let qrCheckInterval = null;
+
+    async function loadWhatsAppInstances() {
+      try {
+        const res = await fetch('/api/whatsapp/instances', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        whatsappInstances = await res.json();
+        renderWhatsAppInstances();
+      } catch (error) {
+        console.error('Erro ao carregar instâncias:', error);
+      }
+    }
+
+    async function loadWhatsAppStats() {
+      try {
+        const res = await fetch('/api/whatsapp/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const stats = await res.json();
+        document.getElementById('whatsappTotal').textContent = stats.total;
+        document.getElementById('whatsappConnected').textContent = stats.connected;
+        document.getElementById('whatsappConnecting').textContent = stats.connecting;
+        document.getElementById('whatsappDisconnected').textContent = stats.disconnected + stats.error;
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas WhatsApp:', error);
+      }
+    }
+
+    function renderWhatsAppInstances() {
+      const container = document.getElementById('whatsappInstancesList');
+      if (whatsappInstances.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--gray-500);padding:2rem">Nenhuma instância criada ainda. Clique em "Nova Instância" para começar.</p>';
+        return;
+      }
+
+      container.innerHTML = whatsappInstances.map(instance => `
+        <div class="instance-card">
+          <div class="instance-info">
+            <div class="instance-name">${instance.name}</div>
+            <div class="instance-phone">${instance.phone || 'Não conectado'}</div>
+            <div class="instance-status ${instance.status}">
+              ${getStatusIcon(instance.status)} ${getStatusText(instance.status)}
+            </div>
+            ${instance.error ? `<div style="color:var(--danger);font-size:0.75rem;margin-top:0.25rem">${instance.error}</div>` : ''}
+          </div>
+          <div class="instance-actions">
+            ${instance.status === 'disconnected' ?
+          `<button class="btn btn-success btn-sm" onclick="connectInstance('${instance.id}')">🔗 Conectar</button>` :
+          instance.status === 'connected' ?
+            `<button class="btn btn-warning btn-sm" onclick="disconnectInstance('${instance.id}')">🔌 Desconectar</button>` :
+            instance.status === 'connecting' ?
+              `<button class="btn btn-primary btn-sm" onclick="showQRCode('${instance.id}')">📱 Ver QR</button>` : ''
+        }
+            <button class="btn btn-danger btn-sm" onclick="deleteInstance('${instance.id}')">🗑️ Excluir</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getStatusIcon(status) {
+      switch (status) {
+        case 'connected': return '✅';
+        case 'connecting': return '🔄';
+        case 'disconnected': return '⚪';
+        case 'error': return '❌';
+        default: return '⚪';
+      }
+    }
+
+    function getStatusText(status) {
+      switch (status) {
+        case 'connected': return 'Conectado';
+        case 'connecting': return 'Conectando';
+        case 'disconnected': return 'Desconectado';
+        case 'error': return 'Erro';
+        default: return 'Desconhecido';
+      }
+    }
+
+    function showCreateInstanceModal() {
+      document.getElementById('createInstanceModal').classList.add('show');
+      document.getElementById('instanceName').focus();
+    }
+
+    function hideCreateInstanceModal() {
+      document.getElementById('createInstanceModal').classList.remove('show');
+      document.getElementById('instanceName').value = '';
+    }
+
+    async function createInstance() {
+      const name = document.getElementById('instanceName').value.trim();
+      if (!name) {
+        alert('Nome da instância é obrigatório');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/whatsapp/instances', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name })
+        });
+
+        if (res.ok) {
+          hideCreateInstanceModal();
+          loadWhatsAppInstances();
+          loadWhatsAppStats();
+          showToast('Instância criada com sucesso!', 'success');
+        } else {
+          const error = await res.json();
+          alert('Erro ao criar instância: ' + error.error);
+        }
+      } catch (error) {
+        alert('Erro ao criar instância: ' + error.message);
+      }
+    }
+
+    async function connectInstance(instanceId) {
+      try {
+        const res = await fetch(`/api/whatsapp/instances/${instanceId}/connect`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          loadWhatsAppInstances();
+          loadWhatsAppStats();
+          showToast('Conectando instância...', 'success');
+          // Start checking for QR code
+          setTimeout(() => checkForQRCode(instanceId), 2000);
+        } else {
+          const error = await res.json();
+          alert('Erro ao conectar: ' + error.error);
+        }
+      } catch (error) {
+        alert('Erro ao conectar: ' + error.message);
+      }
+    }
+
+    async function disconnectInstance(instanceId) {
+      if (!confirm('Deseja realmente desconectar esta instância?')) return;
+
+      try {
+        const res = await fetch(`/api/whatsapp/instances/${instanceId}/disconnect`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          loadWhatsAppInstances();
+          loadWhatsAppStats();
+          showToast('Instância desconectada', 'success');
+        } else {
+          const error = await res.json();
+          alert('Erro ao desconectar: ' + error.error);
+        }
+      } catch (error) {
+        alert('Erro ao desconectar: ' + error.message);
+      }
+    }
+
+    async function deleteInstance(instanceId) {
+      if (!confirm('Deseja realmente excluir esta instância? Esta ação não pode ser desfeita.')) return;
+
+      try {
+        const res = await fetch(`/api/whatsapp/instances/${instanceId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          loadWhatsAppInstances();
+          loadWhatsAppStats();
+          showToast('Instância excluída', 'success');
+        } else {
+          const error = await res.json();
+          alert('Erro ao excluir: ' + error.error);
+        }
+      } catch (error) {
+        alert('Erro ao excluir: ' + error.message);
+      }
+    }
+
+    async function checkForQRCode(instanceId) {
+      try {
+        const res = await fetch(`/api/whatsapp/instances/${instanceId}/qr`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (data.qrCode) {
+          showQRModal(data.qrCode);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar QR Code:', error);
+      }
+    }
+
+    function showQRCode(instanceId) {
+      checkForQRCode(instanceId);
+    }
+
+    function showQRModal(qrCode) {
+      const qrContainer = document.getElementById('qrCodeContainer');
+      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCode)}" alt="QR Code">`;
+      document.getElementById('qrModal').classList.add('show');
+
+      // Auto-refresh QR code every 30 seconds
+      if (qrCheckInterval) clearInterval(qrCheckInterval);
+      qrCheckInterval = setInterval(() => {
+        // QR codes expire, so we close the modal after some time
+        hideQRModal();
+      }, 60000); // 1 minute
+    }
+
+    function hideQRModal() {
+      document.getElementById('qrModal').classList.remove('show');
+      if (qrCheckInterval) {
+        clearInterval(qrCheckInterval);
+        qrCheckInterval = null;
+      }
+      // Refresh instances to check connection status
+      loadWhatsAppInstances();
+      loadWhatsAppStats();
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Auto-refresh WhatsApp data every 10 seconds when on WhatsApp page
+    setInterval(() => {
+      const currentPage = document.querySelector('.nav-item.active')?.dataset.page;
+      if (currentPage === 'whatsapp') {
+        loadWhatsAppInstances();
+        loadWhatsAppStats();
+      }
+    }, 10000);
+
+    // ==================== USER MANAGEMENT ====================
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const users = data.users || [];
+
+        const roleLabels = { admin: 'Administrador', supervisor: 'Supervisor', agent: 'Agente' };
+        const roleColors = { admin: 'danger', supervisor: 'warning', agent: 'success' };
+
+        document.getElementById('usersTable').innerHTML = users.length ? users.map(u => `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <div style="width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600">${u.name?.charAt(0).toUpperCase() || 'U'}</div>
+                <span>@${u.username}</span>
+              </div>
+            </td>
+            <td>${u.name}</td>
+            <td>${u.email || '-'}</td>
+            <td><span class="badge badge-${roleColors[u.role] || 'warning'}">${roleLabels[u.role] || u.role}</span></td>
+            <td><span class="badge badge-${u.active ? 'success' : 'danger'}">${u.active ? 'Ativo' : 'Inativo'}</span></td>
+            <td>${u.last_login ? new Date(u.last_login).toLocaleString('pt-BR') : 'Nunca'}</td>
+            <td>
+              <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')" title="Editar">✏️</button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteUser('${u.id}')" title="Excluir">🗑️</button>
+            </td>
+          </tr>
+        `).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--gray-500)">Nenhum usuário encontrado</td></tr>';
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+      }
+    }
+
+    async function loadInstancesForUserForm() {
+      try {
+        const res = await fetch('/api/whatsapp/instances', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allInstances = await res.json();
+        renderInstancesCheckboxes([]);
+      } catch (error) {
+        console.error('Erro ao carregar instâncias:', error);
+        allInstances = [];
+      }
+    }
+
+    function renderInstancesCheckboxes(selectedInstances = []) {
+      const container = document.getElementById('instancesCheckboxes');
+      if (allInstances.length === 0) {
+        container.innerHTML = '<p style="color:var(--gray-500);font-size:0.875rem">Nenhuma instância disponível</p>';
+        return;
+      }
+
+      container.innerHTML = allInstances.map(inst => `
+        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem;cursor:pointer;border-radius:4px;transition:background 0.2s" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+          <input type="checkbox" name="userInstances" value="${inst.id}" ${selectedInstances.includes(inst.id) ? 'checked' : ''}>
+          <span>${inst.name}</span>
+          <span style="color:var(--gray-500);font-size:0.75rem">${inst.phone || ''}</span>
+        </label>
+      `).join('');
+    }
+
+    function showCreateUserModal() {
+      document.getElementById('userModalTitle').textContent = '➕ Novo Usuário';
+      document.getElementById('userId').value = '';
+      document.getElementById('userUsername').value = '';
+      document.getElementById('userUsername').disabled = false;
+      document.getElementById('userEmail').value = '';
+      document.getElementById('userName').value = '';
+      document.getElementById('userPassword').value = '';
+      document.getElementById('userPassword').required = true;
+      document.getElementById('userPasswordLabel').textContent = 'Senha *';
+      document.getElementById('userRole').value = 'agent';
+      document.getElementById('userActive').value = 'true';
+      document.getElementById('userError').textContent = '';
+
+      loadInstancesForUserForm();
+      updateInstancesVisibility();
+
+      document.getElementById('userModal').classList.add('show');
+    }
+
+    async function editUser(userId) {
+      try {
+        const res = await fetch(`/api/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const user = data.user;
+
+        if (!user) {
+          alert('Usuário não encontrado');
+          return;
+        }
+
+        document.getElementById('userModalTitle').textContent = '✏️ Editar Usuário';
+        document.getElementById('userId').value = user.id;
+        document.getElementById('userUsername').value = user.username;
+        document.getElementById('userUsername').disabled = true;
+        document.getElementById('userEmail').value = user.email || '';
+        document.getElementById('userName').value = user.name;
+        document.getElementById('userPassword').value = '';
+        document.getElementById('userPassword').required = false;
+        document.getElementById('userPasswordLabel').textContent = 'Nova Senha (deixe vazio para manter)';
+        document.getElementById('userRole').value = user.role;
+        document.getElementById('userActive').value = user.active ? 'true' : 'false';
+        document.getElementById('userError').textContent = '';
+
+        await loadInstancesForUserForm();
+        renderInstancesCheckboxes(user.allowedInstances || []);
+        updateInstancesVisibility();
+
+        document.getElementById('userModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar usuário: ' + error.message);
+      }
+    }
+
+    function hideUserModal() {
+      document.getElementById('userModal').classList.remove('show');
+    }
+
+    function updateInstancesVisibility() {
+      const role = document.getElementById('userRole').value;
+      document.getElementById('instancesGroup').style.display = role === 'admin' ? 'none' : 'block';
+    }
+
+    document.getElementById('userRole').addEventListener('change', updateInstancesVisibility);
+
+    async function saveUser(event) {
+      event.preventDefault();
+
+      const userId = document.getElementById('userId').value;
+      const username = document.getElementById('userUsername').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const name = document.getElementById('userName').value.trim();
+      const password = document.getElementById('userPassword').value;
+      const role = document.getElementById('userRole').value;
+      const active = document.getElementById('userActive').value === 'true';
+
+      const selectedInstances = Array.from(document.querySelectorAll('input[name="userInstances"]:checked')).map(cb => cb.value);
+
+      if (!username || !name) {
+        document.getElementById('userError').textContent = 'Preencha os campos obrigatórios';
+        return;
+      }
+
+      if (!userId && !password) {
+        document.getElementById('userError').textContent = 'Senha é obrigatória para novos usuários';
+        return;
+      }
+
+      const userData = {
+        username,
+        email,
+        name,
+        role,
+        active,
+        allowedInstances: role === 'admin' ? [] : selectedInstances
+      };
+
+      if (password) {
+        userData.password = password;
+      }
+
+      try {
+        const url = userId ? `/api/users/${userId}` : '/api/users';
+        const method = userId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success !== false) {
+          hideUserModal();
+          loadUsers();
+          loadDashboard();
+          showToast(userId ? 'Usuário atualizado!' : 'Usuário criado!', 'success');
+        } else {
+          document.getElementById('userError').textContent = data.error || 'Erro ao salvar usuário';
+        }
+      } catch (error) {
+        document.getElementById('userError').textContent = 'Erro ao salvar: ' + error.message;
+      }
+    }
+
+    async function deleteUser(userId) {
+      if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+
+      try {
+        const res = await fetch(`/api/users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          loadUsers();
+          loadDashboard();
+          showToast('Usuário excluído', 'success');
+        } else {
+          const data = await res.json();
+          alert('Erro ao excluir: ' + (data.error || 'Erro desconhecido'));
+        }
+      } catch (error) {
+        alert('Erro ao excluir: ' + error.message);
+      }
+    }
+
+  </script>
+</body>
+
+</html>

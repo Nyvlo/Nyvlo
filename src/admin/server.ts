@@ -1,9 +1,14 @@
 import express, { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import * as path from 'path';
 import { Server as SocketIOServer } from 'socket.io';
 import * as http from 'http';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 import multer from 'multer';
 import * as fs from 'fs';
 import { DatabaseService } from '../services/database-service';
@@ -109,12 +114,13 @@ export class AdminServer {
     });
 
     // Serve static files from src/admin/public (works in both dev and prod)
-    const publicPath = path.join(__dirname, '..', '..', 'src', 'admin', 'public');
+    const publicPath = path.resolve(__dirname, 'public');
     this.app.use(express.static(publicPath));
     this.app.use('/admin', express.static(publicPath));
 
-    // Serve uploads directory
-    const uploadsPath = path.join(__dirname, '..', '..', 'uploads');
+    // Serve uploads directory - root of project
+    this.app.use(express.static(path.resolve(__dirname, '../../web-interface/dist')));
+    const uploadsPath = path.resolve(__dirname, '..', '..', 'uploads');
     if (!fs.existsSync(uploadsPath)) {
       fs.mkdirSync(uploadsPath, { recursive: true });
     }
@@ -135,7 +141,8 @@ export class AdminServer {
       req.tenantId = decoded.tenantId || 'system-default';
       req.userRole = decoded.role || 'agent';
       next();
-    } catch {
+    } catch (error) {
+      console.log(`[DEBUG] Falha na verificação do token: ${(error as Error).message}`);
       res.status(401).json({ error: 'Token inválido' });
     }
   }
@@ -242,6 +249,12 @@ export class AdminServer {
     });
     const upload = multer({ storage });
     this.app.post('/api/tenants/me/logo', this.authMiddleware.bind(this), upload.single('logo'), this.handleLogoUpload.bind(this));
+
+    // Catch-all API routes
+    this.app.use('/api/*', (req, res) => {
+      console.log(`[DEBUG] Rota API não encontrada: ${req.method} ${req.originalUrl}`);
+      res.status(404).json({ error: 'Rota não encontrada' });
+    });
   }
 
   private async handleLogoUpload(req: AuthRequest, res: Response): Promise<void> {
@@ -273,10 +286,13 @@ export class AdminServer {
     }
 
     // First try web_users table (new system)
+    console.log(`[DEBUG] Tentativa de login para usuário: ${username}`);
     const webUser = await this.database.get<any>('SELECT * FROM web_users WHERE username = ? AND active = 1', [username]);
 
     if (webUser) {
+      console.log(`[DEBUG] Usuário encontrado em web_users: ${webUser.id}`);
       const validPassword = await bcrypt.compare(password, webUser.password_hash);
+      console.log(`[DEBUG] Senha válida? ${validPassword}`);
       if (validPassword) {
 
         // 2FA Checks
@@ -309,6 +325,7 @@ export class AdminServer {
           });
         }
 
+        console.log(`[DEBUG] Gerando token...`);
         // Generate token compatible with new auth middleware
         const token = jwt.sign({
           userId: webUser.id,
@@ -317,6 +334,7 @@ export class AdminServer {
           role: webUser.role,
           allowedInstances: JSON.parse(webUser.allowed_instances || '[]')
         }, JWT_SECRET, { expiresIn: '8h' });
+        console.log(`[DEBUG] Token gerado com sucesso`);
 
         res.json({
           token,

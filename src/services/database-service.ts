@@ -78,18 +78,6 @@ export class DatabaseService {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Tabela de Add-ons Ativos por Tenant
-      CREATE TABLE IF NOT EXISTS tenant_addons (
-        id SERIAL PRIMARY KEY,
-        tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-        addon_type TEXT NOT NULL,
-        enabled BOOLEAN DEFAULT TRUE,
-        price_override DECIMAL(10, 2),
-        activated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        activated_by TEXT,
-        UNIQUE(tenant_id, addon_type)
-      );
-
       -- Tabela de Tenants (Clientes SaaS)
       CREATE TABLE IF NOT EXISTS tenants (
         id TEXT PRIMARY KEY,
@@ -115,6 +103,18 @@ export class DatabaseService {
         expires_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Tabela de Add-ons Ativos por Tenant
+      CREATE TABLE IF NOT EXISTS tenant_addons (
+        id SERIAL PRIMARY KEY,
+        tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        addon_type TEXT NOT NULL,
+        enabled BOOLEAN DEFAULT TRUE,
+        price_override DECIMAL(10, 2),
+        activated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        activated_by TEXT,
+        UNIQUE(tenant_id, addon_type)
       );
 
       -- Tabelas principais do Bot
@@ -500,6 +500,22 @@ export class DatabaseService {
         conversation_id TEXT NOT NULL REFERENCES web_conversations(id),
         label_id TEXT NOT NULL REFERENCES web_labels(id),
         PRIMARY KEY (tenant_id, conversation_id, label_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS web_contacts (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL REFERENCES tenants(id),
+        instance_id TEXT NOT NULL,
+        whatsapp_id TEXT NOT NULL,
+        name TEXT,
+        push_name TEXT,
+        phone_number TEXT,
+        profile_picture TEXT,
+        is_business BOOLEAN DEFAULT FALSE,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(tenant_id, instance_id, whatsapp_id)
       );
 
       CREATE TABLE IF NOT EXISTS web_contact_custom_fields (
