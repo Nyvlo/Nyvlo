@@ -43,7 +43,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const { user: currentUser } = useAuthStore()
 
   const fetchData = useCallback(async () => {
@@ -52,7 +52,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
         usersApi.list(),
         instancesApi.list()
       ])
-      
+
       if (usersRes.success && usersRes.data) {
         setUsers(usersRes.data.users || [])
       }
@@ -121,7 +121,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
         if (formData.password) {
           updateData.password = formData.password
         }
-        
+
         const res = await usersApi.update(editingUser.id, updateData)
         if (!res.success) {
           setError(res.error || 'Erro ao atualizar usuário')
@@ -132,7 +132,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
           setError('Senha é obrigatória para novos usuários')
           return
         }
-        
+
         const res = await usersApi.create(formData)
         if (!res.success) {
           setError(res.error || 'Erro ao criar usuário')
@@ -201,13 +201,13 @@ export default function UserManagement({ onClose }: UserManagementProps) {
         <div className="panel-header">
           <button className="back-btn" onClick={onClose}>
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
             </svg>
           </button>
           <h2>Gerenciar Usuários</h2>
           <button className="add-user-btn" onClick={() => handleOpenForm()}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
             Novo
           </button>
@@ -278,9 +278,9 @@ export default function UserManagement({ onClose }: UserManagementProps) {
                     <label>Função *</label>
                     <select
                       value={formData.role}
-                      onChange={e => setFormData(prev => ({ 
-                        ...prev, 
-                        role: e.target.value as 'admin' | 'agent' | 'supervisor' 
+                      onChange={e => setFormData(prev => ({
+                        ...prev,
+                        role: e.target.value as 'admin' | 'agent' | 'supervisor'
                       }))}
                     >
                       <option value="agent">Agente</option>
@@ -293,9 +293,9 @@ export default function UserManagement({ onClose }: UserManagementProps) {
                     <label>Status</label>
                     <select
                       value={formData.active ? 'active' : 'inactive'}
-                      onChange={e => setFormData(prev => ({ 
-                        ...prev, 
-                        active: e.target.value === 'active' 
+                      onChange={e => setFormData(prev => ({
+                        ...prev,
+                        active: e.target.value === 'active'
                       }))}
                     >
                       <option value="active">Ativo</option>
@@ -304,7 +304,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
                   </div>
                 </div>
 
-                {formData.role !== 'admin' && instances.length > 0 && (
+                {instances.length > 0 && (
                   <div className="form-group">
                     <label>Instâncias WhatsApp Permitidas</label>
                     <div className="instances-checkboxes">
@@ -339,7 +339,7 @@ export default function UserManagement({ onClose }: UserManagementProps) {
           ) : users.length === 0 ? (
             <div className="empty-state">
               <svg viewBox="0 0 24 24" width="64" height="64" fill="#8696a0">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
               </svg>
               <p>Nenhum usuário cadastrado</p>
               <button className="create-first-btn" onClick={() => handleOpenForm()}>
@@ -361,23 +361,23 @@ export default function UserManagement({ onClose }: UserManagementProps) {
                     {getRoleLabel(user.role)}
                   </div>
                   <div className="user-actions">
-                    <button 
+                    <button
                       className="edit-btn"
                       onClick={() => handleOpenForm(user)}
                       title="Editar"
                     >
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                       </svg>
                     </button>
                     {user.id !== currentUser?.id && (
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={() => handleDelete(user.id)}
                         title="Excluir"
                       >
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                         </svg>
                       </button>
                     )}

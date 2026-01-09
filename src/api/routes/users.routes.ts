@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import multer from 'multer';
 import { DatabaseService } from '../../services/database-service';
@@ -262,9 +262,9 @@ export function createUsersRoutes(
           const timestamp = new Date().toISOString();
 
           await database.run(`
-            INSERT INTO web_users (id, tenant_id, username, email, password_hash, name, role, birth_date, cpf, must_change_password, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, 'agent', ?, ?, 1, ?)
-          `, [id, req.tenantId, email, email, passwordHash, name, birthDate, cpf, timestamp]);
+            INSERT INTO web_users (id, tenant_id, username, email, password_hash, name, role, birth_date, cpf, must_change_password, allowed_instances, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, 'agent', ?, ?, 1, ?, ?)
+          `, [id, req.tenantId, email, email, passwordHash, name, birthDate, cpf, JSON.stringify([]), timestamp]);
 
           results.success++;
         } catch (err: any) {

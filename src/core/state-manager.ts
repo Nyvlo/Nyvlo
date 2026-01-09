@@ -15,17 +15,17 @@ export class StateManager {
     this.logger = logger;
   }
 
-  async getState(userId: string): Promise<UserState> {
-    // Get the actual user ID from phone
-    const user = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ?', [userId]);
+  async getState(userId: string, tenantId: string = 'system-default'): Promise<UserState> {
+    // Get the actual user ID from phone and tenant
+    const user = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ? AND tenant_id = ?', [userId, tenantId]);
 
     if (!user) {
       return this.createDefaultState();
     }
 
     const session = await this.database.get<{ state: string; data: string; last_activity: string }>(
-      'SELECT state, data, last_activity FROM sessions WHERE user_id = ?',
-      [user.id]
+      'SELECT state, data, last_activity FROM sessions WHERE user_id = ? AND tenant_id = ?',
+      [user.id, tenantId]
     );
 
     if (!session) {
@@ -43,9 +43,9 @@ export class StateManager {
     };
   }
 
-  async setState(userId: string, state: UserState): Promise<void> {
+  async setState(userId: string, state: UserState, tenantId: string = 'system-default'): Promise<void> {
     // Ensure user exists first and get the actual user ID
-    const actualUserId = await this.ensureUser(userId);
+    const actualUserId = await this.ensureUser(userId, tenantId);
 
     const sessionData = JSON.stringify({
       previousState: state.previousState,
@@ -53,35 +53,35 @@ export class StateManager {
       context: state.context
     });
 
-    const existing = await this.database.get<{ id: string }>('SELECT id FROM sessions WHERE user_id = ?', [actualUserId]);
+    const existing = await this.database.get<{ id: string }>('SELECT id FROM sessions WHERE user_id = ? AND tenant_id = ?', [actualUserId, tenantId]);
 
     if (existing) {
       await this.database.run(
-        'UPDATE sessions SET state = ?, data = ?, last_activity = CURRENT_TIMESTAMP WHERE user_id = ?',
-        [state.currentState, sessionData, actualUserId]
+        'UPDATE sessions SET state = ?, data = ?, last_activity = CURRENT_TIMESTAMP WHERE user_id = ? AND tenant_id = ?',
+        [state.currentState, sessionData, actualUserId, tenantId]
       );
     } else {
       await this.database.run(
-        'INSERT INTO sessions (id, user_id, state, data) VALUES (?, ?, ?, ?)',
-        [uuidv4(), actualUserId, state.currentState, sessionData]
+        'INSERT INTO sessions (id, tenant_id, user_id, state, data) VALUES (?, ?, ?, ?, ?)',
+        [uuidv4(), tenantId, actualUserId, state.currentState, sessionData]
       );
     }
   }
 
-  async checkTimeout(userId: string): Promise<boolean> {
-    const state = await this.getState(userId);
+  async checkTimeout(userId: string, tenantId: string = 'system-default'): Promise<boolean> {
+    const state = await this.getState(userId, tenantId);
     const timeoutMs = this.config.bot.sessionTimeout * 60 * 1000;
     const now = Date.now();
 
     return (now - state.lastActivity) > timeoutMs;
   }
 
-  async resetState(userId: string): Promise<void> {
-    await this.setState(userId, this.createDefaultState());
+  async resetState(userId: string, tenantId: string = 'system-default'): Promise<void> {
+    await this.setState(userId, this.createDefaultState(), tenantId);
   }
 
-  async transition(userId: string, nextState: BotState, contextUpdate?: Partial<ConversationContext>): Promise<void> {
-    const currentState = await this.getState(userId);
+  async transition(userId: string, nextState: BotState, contextUpdate?: Partial<ConversationContext>, tenantId: string = 'system-default'): Promise<void> {
+    const currentState = await this.getState(userId, tenantId);
 
     const newState: UserState = {
       currentState: nextState,
@@ -94,11 +94,11 @@ export class StateManager {
       }
     };
 
-    await this.setState(userId, newState);
+    await this.setState(userId, newState, tenantId);
   }
 
-  async updateContext(userId: string, contextUpdate: Partial<ConversationContext>): Promise<void> {
-    const currentState = await this.getState(userId);
+  async updateContext(userId: string, contextUpdate: Partial<ConversationContext>, tenantId: string = 'system-default'): Promise<void> {
+    const currentState = await this.getState(userId, tenantId);
 
     const newState: UserState = {
       ...currentState,
@@ -109,23 +109,23 @@ export class StateManager {
       }
     };
 
-    await this.setState(userId, newState);
+    await this.setState(userId, newState, tenantId);
   }
 
-  private async ensureUser(phone: string): Promise<string> {
-    const existing = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ?', [phone]);
+  private async ensureUser(phone: string, tenantId: string): Promise<string> {
+    const existing = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ? AND tenant_id = ?', [phone, tenantId]);
 
     if (!existing) {
       try {
         const userId = uuidv4();
         await this.database.run(
-          'INSERT INTO users (id, phone, name, type) VALUES (?, ?, ?, \'lead\')',
-          [userId, phone, `Usuário ${phone.slice(-4)}`]
+          'INSERT INTO users (id, tenant_id, phone, name, type) VALUES (?, ?, ?, ?, \'lead\')',
+          [userId, tenantId, phone, `Usuário ${phone.slice(-4)}`]
         );
         return userId;
       } catch (error) {
         // User might have been created by another process, try to get it
-        const retry = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ?', [phone]);
+        const retry = await this.database.get<{ id: string }>('SELECT id FROM users WHERE phone = ? AND tenant_id = ?', [phone, tenantId]);
         if (retry) {
           return retry.id;
         }
@@ -133,8 +133,8 @@ export class StateManager {
       }
     } else {
       await this.database.run(
-        'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE phone = ?',
-        [phone]
+        'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE phone = ? AND tenant_id = ?',
+        [phone, tenantId]
       );
       return existing.id;
     }

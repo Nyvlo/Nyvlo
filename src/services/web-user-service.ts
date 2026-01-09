@@ -1,13 +1,14 @@
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { DatabaseService } from './database-service';
 import { LogService } from './log-service';
 
 export interface WebUser {
   id: string;
+  tenantId: string;
   username: string;
   email: string;
   name: string;
-  role: 'admin' | 'agent' | 'supervisor';
+  role: 'admin' | 'agent' | 'supervisor' | 'superadmin';
   allowedInstances: string[];
   active: boolean;
   createdAt: string;
@@ -16,18 +17,19 @@ export interface WebUser {
 }
 
 export interface CreateUserInput {
+  tenantId: string;
   username: string;
   email?: string;
   password: string;
   name: string;
-  role?: 'admin' | 'agent' | 'supervisor';
+  role?: 'admin' | 'agent' | 'supervisor' | 'superadmin';
   allowedInstances?: string[];
 }
 
 export interface UpdateUserInput {
   email?: string;
   name?: string;
-  role?: 'admin' | 'agent' | 'supervisor';
+  role?: 'admin' | 'agent' | 'supervisor' | 'superadmin';
   allowedInstances?: string[];
   active?: boolean;
   password?: string;
@@ -43,7 +45,7 @@ export class WebUserService {
   }
 
   async createUser(input: CreateUserInput): Promise<WebUser> {
-    // Check if username exists
+    // Check if username exists globally
     const existing = await this.database.get('SELECT id FROM web_users WHERE username = ?', [input.username]);
     if (existing) {
       throw new Error('Nome de usuário já existe');
@@ -55,11 +57,12 @@ export class WebUserService {
 
     await this.database.run(`
       INSERT INTO web_users (
-        id, username, email, password_hash, name, role, 
+        id, tenant_id, username, email, password_hash, name, role, 
         allowed_instances, active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
     `, [
       id,
+      input.tenantId,
       input.username,
       input.email || '',
       passwordHash,
@@ -70,14 +73,14 @@ export class WebUserService {
       timestamp
     ]);
 
-    this.logger.info('Usuário criado', { userId: id, username: input.username });
-    const user = await this.getUserById(id);
+    this.logger.info('Usuário criado', { userId: id, username: input.username, tenantId: input.tenantId });
+    const user = await this.getUserById(input.tenantId, id);
     if (!user) throw new Error('Erro ao criar usuário');
     return user;
   }
 
-  async updateUser(id: string, input: UpdateUserInput): Promise<WebUser | null> {
-    const user = await this.getUserById(id);
+  async updateUser(tenantId: string, id: string, input: UpdateUserInput): Promise<WebUser | null> {
+    const user = await this.getUserById(tenantId, id);
     if (!user) return null;
 
     const updates: string[] = [];
@@ -112,32 +115,34 @@ export class WebUserService {
       updates.push('updated_at = ?');
       values.push(new Date().toISOString());
       values.push(id);
-      await this.database.run(`UPDATE web_users SET ${updates.join(', ')} WHERE id = ?`, values);
+      values.push(tenantId);
+      await this.database.run(`UPDATE web_users SET ${updates.join(', ')} WHERE id = ? AND tenant_id = ?`, values);
     }
 
-    this.logger.info('Usuário atualizado', { userId: id });
-    return this.getUserById(id);
+    this.logger.info('Usuário atualizado', { userId: id, tenantId });
+    return this.getUserById(tenantId, id);
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await this.database.run('DELETE FROM web_users WHERE id = ?', [id]);
+  async deleteUser(tenantId: string, id: string): Promise<boolean> {
+    const result = await this.database.run('DELETE FROM web_users WHERE id = ? AND tenant_id = ?', [id, tenantId]);
 
     if (result.changes > 0) {
-      this.logger.info('Usuário deletado', { userId: id });
+      this.logger.info('Usuário deletado', { userId: id, tenantId });
       return true;
     }
     return false;
   }
 
-  async getUserById(id: string): Promise<WebUser | null> {
+  async getUserById(tenantId: string, id: string): Promise<WebUser | null> {
     const user = await this.database.get<any>(`
-      SELECT * FROM web_users WHERE id = ?
-    `, [id]);
+      SELECT * FROM web_users WHERE id = ? AND tenant_id = ?
+    `, [id, tenantId]);
 
     return user ? this.formatUser(user) : null;
   }
 
   async getUserByUsername(username: string): Promise<WebUser | null> {
+    // Username is unique globally usually, but let's select all and format
     const user = await this.database.get<any>(`
       SELECT * FROM web_users WHERE username = ?
     `, [username]);
@@ -145,31 +150,27 @@ export class WebUserService {
     return user ? this.formatUser(user) : null;
   }
 
-  async listUsers(filters?: { role?: string; active?: boolean }): Promise<WebUser[]> {
-    let query = 'SELECT * FROM web_users';
-    const conditions: string[] = [];
-    const params: any[] = [];
+  async listUsers(tenantId: string, filters?: { role?: string; active?: boolean }): Promise<WebUser[]> {
+    let query = 'SELECT * FROM web_users WHERE tenant_id = ?';
+    const params: any[] = [tenantId];
 
     if (filters?.role) {
-      conditions.push('role = ?');
+      query += ' AND role = ?';
       params.push(filters.role);
     }
     if (filters?.active !== undefined) {
-      conditions.push('active = ?');
+      query += ' AND active = ?';
       params.push(filters.active ? 1 : 0);
     }
 
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
     query += ' ORDER BY created_at DESC';
 
     const users = await this.database.query<any>(query, params);
     return users.map(u => this.formatUser(u));
   }
 
-  async changePassword(id: string, currentPassword: string, newPassword: string): Promise<boolean> {
-    const user = await this.database.get<any>('SELECT password_hash FROM web_users WHERE id = ?', [id]);
+  async changePassword(tenantId: string, id: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.database.get<any>('SELECT password_hash FROM web_users WHERE id = ? AND tenant_id = ?', [id, tenantId]);
 
     if (!user) return false;
 
@@ -177,24 +178,26 @@ export class WebUserService {
     if (!valid) return false;
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await this.database.run('UPDATE web_users SET password_hash = ?, updated_at = ? WHERE id = ?', [
+    await this.database.run('UPDATE web_users SET password_hash = ?, updated_at = ? WHERE id = ? AND tenant_id = ?', [
       newHash,
       new Date().toISOString(),
-      id
+      id,
+      tenantId
     ]);
 
-    this.logger.info('Senha alterada', { userId: id });
+    this.logger.info('Senha alterada', { userId: id, tenantId });
     return true;
   }
 
   hasPermission(user: WebUser, instanceId: string): boolean {
-    if (user.role === 'admin') return true;
+    if (user.role === 'admin' || user.role === 'superadmin') return true;
     return user.allowedInstances.includes(instanceId) || user.allowedInstances.includes('*');
   }
 
   private formatUser(user: any): WebUser {
     return {
       id: user.id,
+      tenantId: user.tenant_id,
       username: user.username,
       email: user.email || '',
       name: user.name,

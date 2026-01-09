@@ -26,9 +26,9 @@ export function createInstancesRoutes(
       let instances = whatsappManager.getInstances(req.tenantId);
 
       // Filter by user permissions if not admin
-      if (req.userRole !== 'admin' && req.userRole !== 'superadmin' && req.allowedInstances) {
-        const allowed = req.allowedInstances;
-        if (allowed.length > 0 && !allowed.includes('*')) {
+      if (req.userRole !== 'admin' && req.userRole !== 'superadmin') {
+        const allowed = req.allowedInstances || [];
+        if (!allowed.includes('*')) {
           instances = instances.filter((i: any) => allowed.includes(i.id));
         }
       }

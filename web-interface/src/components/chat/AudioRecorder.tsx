@@ -111,7 +111,9 @@ export default function AudioRecorder({ onSend, onCancel }: AudioRecorderProps) 
       if (timerRef.current) clearInterval(timerRef.current)
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
       if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop())
-      if (audioContextRef.current) audioContextRef.current.close()
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close()
+      }
     }
   }, [isRecording])
 
@@ -164,7 +166,9 @@ export default function AudioRecorder({ onSend, onCancel }: AudioRecorderProps) 
       if (timerRef.current) clearInterval(timerRef.current)
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
       if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop())
-      if (audioContextRef.current) audioContextRef.current.close()
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close()
+      }
     }
   }, [startRecording])
 

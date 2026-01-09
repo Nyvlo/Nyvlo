@@ -3,6 +3,7 @@ import { DatabaseService } from '../../services/database-service';
 import { LogService } from '../../services/log-service';
 import { authMiddleware, AuthRequest, adminMiddleware, superAdminOnly } from '../middleware/auth.middleware';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 export function createTenantsRoutes(database: DatabaseService, logger: LogService): Router {
     const router = Router();
@@ -55,20 +56,41 @@ export function createTenantsRoutes(database: DatabaseService, logger: LogServic
                 return;
             }
 
-            const id = `tnt_${uuidv4().substring(0, 8)}`;
+            const id = req.body.id || `tnt_${uuidv4().substring(0, 8)}`;
 
-            await database.run(`
-                INSERT INTO tenants (
-                    id, name, status, plan_id, max_instances, max_agents, 
-                    expires_at, industry_type, custom_domain, asaas_customer_id, 
-                    pagarme_customer_id, pagarme_subscription_id, module_ai_evaluation
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [
-                id, name, 'active', plan_id || 'trial', max_instances || 1, max_agents || 2,
-                expires_at, industry_type || 'general', custom_domain, asaas_customer_id,
-                pagarme_customer_id, pagarme_subscription_id, module_ai_evaluation || false
-            ]);
+            await database.transaction(async () => {
+                // 1. Create Tenant
+                await database.run(`
+                    INSERT INTO tenants (
+                        id, name, status, plan_id, max_instances, max_agents, 
+                        expires_at, industry_type, custom_domain, asaas_customer_id, 
+                        pagarme_customer_id, pagarme_subscription_id, module_ai_evaluation
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [
+                    id, name, req.body.status || 'active', plan_id || 'trial', max_instances || 1, max_agents || 2,
+                    expires_at, industry_type || 'general', custom_domain, asaas_customer_id,
+                    pagarme_customer_id, pagarme_subscription_id, module_ai_evaluation || false
+                ]);
+
+                // 2. Create Admin User if provided
+                const { adminName, adminUsername, adminPassword, adminEmail } = req.body;
+                if (adminUsername && adminPassword) {
+                    const userId = `usr_${uuidv4().substring(0, 8)}`;
+                    const passwordHash = await bcrypt.hash(adminPassword, 10);
+                    await database.run(`
+                        INSERT INTO web_users (id, tenant_id, username, email, password_hash, name, role, allowed_instances)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [userId, id, adminUsername, adminEmail || '', passwordHash, adminName || adminUsername, 'admin', JSON.stringify(['*'])]);
+                    console.log(`[DEBUG] Usuário admin ${adminUsername} criado para o tenant ${id}`);
+                }
+
+                // 3. Create Default Bot Settings
+                await database.run(`
+                    INSERT INTO bot_settings (tenant_id, company_name, welcome_message)
+                    VALUES (?, ?, ?)
+                `, [id, name, `Olá! Bem-vindo ao atendimento da ${name}. Como podemos ajudar?`]);
+            });
 
             res.json({ success: true, tenantId: id });
         } catch (error) {

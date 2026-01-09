@@ -54,9 +54,9 @@ export function createAuthRoutes(database: DatabaseService, logger: LogService, 
         // Create Admin User
         const passwordHash = await bcrypt.hash(password, 10);
         await database.run(`
-          INSERT INTO web_users (id, tenant_id, username, email, password_hash, name, role)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [userId, tenantId, email, email, passwordHash, name, 'admin']);
+          INSERT INTO web_users (id, tenant_id, username, email, password_hash, name, role, allowed_instances)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [userId, tenantId, email, email, passwordHash, name, 'admin', JSON.stringify(['*'])]);
 
         // Create Default Bot Settings
         await database.run(`

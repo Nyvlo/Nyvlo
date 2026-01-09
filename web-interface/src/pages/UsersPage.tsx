@@ -490,7 +490,7 @@ export default function UsersPage() {
                     </div>
                   </div>
 
-                  {formData.role !== 'admin' && (
+                  {instances.length > 0 && (
                     <div className="form-group instances-group">
                       <div className="instances-header">
                         <label>Instâncias WhatsApp Permitidas</label>

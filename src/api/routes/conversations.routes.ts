@@ -258,23 +258,22 @@ export function createConversationsRoutes(
 
       await database.run(`
         INSERT INTO web_messages (
-          id, conversation_id, whatsapp_message_id, sender_id, sender_name,
+          id, tenant_id, conversation_id, whatsapp_message_id, sender_id, sender_name,
           type, content, media_url, reply_to_id, status_sent, is_from_me, timestamp, is_internal
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         id,
         req.tenantId,
-
         conversationId,
-        isInternal ? null : messageId, // whatsapp_message_id is null for internal messages
+        isInternal ? null : messageId,
         req.userId,
-        req.userRole || 'admin', // Use user role or 'admin' as sender name for internal messages
+        req.userRole || 'admin',
         type,
         content,
         mediaUrl || null,
         replyTo || null,
-        isInternal ? 1 : 1, // status_sent is always 1 for messages sent from the app
-        1, // is_from_me is always 1 for messages sent from the app
+        1, // status_sent
+        1, // is_from_me
         timestamp,
         isInternal ? 1 : 0
       ]);

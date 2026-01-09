@@ -13,10 +13,8 @@ import {
   Play,
   ExternalLink,
   MessageSquare,
-  Clock,
   Wand2,
   ShieldCheck,
-  Share2,
   Trash2,
   Bookmark
 } from 'lucide-react'
@@ -154,26 +152,24 @@ export default function MessageArea({ searchTerm }: MessageAreaProps) {
       case 'image':
         return (
           <div className="space-y-4">
-            <div className="relative group overflow-hidden rounded-[32px] border border-black/5 bg-slate-100 shadow-xl transition-all hover:scale-[1.02]">
-              <img src={mediaUrl} alt="" loading="lazy" className="max-w-full h-auto object-cover group-hover:scale-110 transition-transform duration-1000 min-h-[120px]" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[4px]">
-                <button className="w-16 h-16 bg-white/20 backdrop-blur-2xl rounded-[24px] text-white hover:bg-white/40 active:scale-90 transition-all shadow-2xl flex items-center justify-center border border-white/20">
-                  <ExternalLink className="w-7 h-7" />
+            <div className="relative group overflow-hidden rounded-[20px] border border-black/5 bg-slate-100 shadow-sm transition-all hover:scale-[1.01]">
+              <img src={mediaUrl} alt="" loading="lazy" className="max-w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700 min-h-[120px]" />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                <button className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-white/40 active:scale-90 transition-all shadow-xl flex items-center justify-center border border-white/20">
+                  <ExternalLink className="w-5 h-5" />
                 </button>
               </div>
-              <div className="absolute top-4 right-4 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black text-white uppercase tracking-widest">HQ Visual</div>
             </div>
-            {message.content && <p className="text-[15px] font-bold text-inherit leading-relaxed px-2 mt-4">{message.content}</p>}
+            {message.content && <p className="text-[15px] font-medium text-inherit leading-relaxed px-1 mt-2">{message.content}</p>}
           </div>
         )
       case 'video':
         return (
           <div className="space-y-4">
-            <div className="rounded-[32px] overflow-hidden border border-black/10 bg-black shadow-2xl relative group">
+            <div className="rounded-[20px] overflow-hidden border border-black/5 bg-black shadow-lg relative group">
               <video src={mediaUrl} controls className="w-full max-h-[450px]" />
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 via-transparent to-black/10" />
             </div>
-            {message.content && <p className="text-[15px] font-bold text-inherit leading-relaxed px-2 mt-4">{message.content}</p>}
+            {message.content && <p className="text-[15px] font-medium text-inherit leading-relaxed px-1 mt-2">{message.content}</p>}
           </div>
         )
       case 'audio':
@@ -204,37 +200,34 @@ export default function MessageArea({ searchTerm }: MessageAreaProps) {
       case 'document':
         return (
           <div className={cn(
-            "flex items-center gap-5 p-5 rounded-[28px] border-2 transition-all hover:shadow-2xl active:scale-[0.98] group/doc",
-            isFromMe ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-slate-50 border-slate-100 hover:border-emerald-500/20"
+            "flex items-center gap-4 p-4 rounded-[18px] border transition-all active:scale-[0.98] group/doc",
+            isFromMe ? "bg-black/5 border-transparent" : "bg-slate-50 border-slate-100"
           )}>
             <div className={cn(
-              "w-14 h-14 rounded-[22px] flex items-center justify-center flex-shrink-0 shadow-2xl transition-all group-hover/doc:rotate-3",
+              "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-all",
               isFromMe ? "bg-white text-slate-900" : "bg-red-500 text-white"
             )}>
-              <FileText className="w-7 h-7" />
+              <FileText className="w-6 h-6" />
             </div>
-            <div className="flex-1 min-w-0 pr-6">
-              <p className={cn("text-[15px] font-black truncate leading-tight mb-1.5", isFromMe ? "text-white" : "text-slate-900")}>
-                {message.content || 'Relatório de Operação'}
+            <div className="flex-1 min-w-0 pr-4">
+              <p className={cn("text-[14px] font-semibold truncate leading-tight mb-1", isFromMe ? "text-slate-900" : "text-slate-900")}>
+                {message.fileName || 'Arquivo'}
               </p>
               <div className="flex items-center gap-2">
-                <div className={cn("px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest", isFromMe ? "bg-white/10 text-white/60" : "bg-slate-200 text-slate-500")}>
-                  {message.fileName?.split('.').pop() || 'PDF'}
-                </div>
-                <span className={cn("text-[10px] font-bold", isFromMe ? "text-white/40" : "text-slate-400")}>
-                  {(message.fileSize ? (message.fileSize / 1024 / 1024).toFixed(1) : '2.4')} MB
+                <span className="text-[10px] font-semibold text-slate-500">
+                  {message.fileName?.split('.').pop()?.toUpperCase() || 'DOCUMENTO'} • {(message.fileSize ? (message.fileSize / 1024 / 1024).toFixed(1) : '2.4')} MB
                 </span>
               </div>
             </div>
-            <button className={cn("w-10 h-10 rounded-2xl flex items-center justify-center transition-all", isFromMe ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-slate-900 shadow-xl hover:-translate-y-1")}>
-              <Download className="w-5 h-5" />
+            <button className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-sm", isFromMe ? "bg-white text-slate-900 hover:bg-slate-50" : "bg-white text-slate-900 shadow-md hover:bg-slate-50")}>
+              <Download className="w-4 h-4" />
             </button>
           </div>
         )
       case 'sticker':
         return <img src={mediaUrl} alt="sticker" className="w-48 h-48 object-contain animate-in zoom-in duration-700" />
       default:
-        return <p className="text-[16px] font-bold leading-relaxed whitespace-pre-wrap tracking-tight">{message.content}</p>
+        return <p className="text-[15px] font-medium leading-relaxed whitespace-pre-wrap tracking-tight">{message.content}</p>
     }
   }
 
@@ -289,17 +282,16 @@ export default function MessageArea({ searchTerm }: MessageAreaProps) {
                 )}
 
                 <div className={cn(
-                  "flex flex-col animate-in fade-in slide-in-from-bottom-6 duration-700 mb-2 relative",
+                  "flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 mb-1 relative",
                   isFromMe ? "items-end" : "items-start"
                 )}>
                   <div className={cn(
-                    "relative max-w-[88%] lg:max-w-[80%] px-7 py-5 shadow-2xl group transition-all duration-500",
+                    "relative max-w-[85%] lg:max-w-[70%] px-4 py-2.5 shadow-sm group transition-all duration-300",
                     isFromMe
-                      ? "bg-white text-slate-900 rounded-[35px] rounded-tr-lg hover:shadow-slate-300/40 border border-slate-200"
+                      ? "bg-[#D9FDD3] text-[#111B21] rounded-[18px] rounded-tr-none border border-[#CBD9C7]/30"
                       : (isNote
-                        ? "bg-amber-50/80 rounded-[35px] rounded-tl-lg border border-amber-200/50 shadow-amber-500/10"
-                        : "bg-white text-slate-900 rounded-[35px] rounded-tl-lg border border-slate-100/70 shadow-slate-900/[0.04]"),
-                    isNote && "ring-8 ring-amber-500/[0.03]"
+                        ? "bg-amber-50 rounded-[18px] rounded-tl-none border border-amber-200/50"
+                        : "bg-white text-[#111B21] rounded-[18px] rounded-tl-none border border-slate-200/50 shadow-sm")
                   )}
                     onContextMenu={(e) => handleContextMenu(e, message)}
                   >
@@ -369,11 +361,11 @@ export default function MessageArea({ searchTerm }: MessageAreaProps) {
 
                     {/* Meta Footer */}
                     <div className={cn(
-                      "flex items-center justify-end gap-3 mt-4 px-1",
-                      isFromMe ? "text-white/40" : "text-slate-400"
+                      "flex items-center justify-end gap-1.5 mt-1 opacity-70",
+                      isFromMe ? "text-[#667781]" : "text-[#667781]"
                     )}>
-                      {message.isStarred && <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 drop-shadow-sm" />}
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] tabular-nums">{formatTime(message.timestamp)}</span>
+                      {message.isStarred && <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />}
+                      <span className="text-[11px] font-normal tabular-nums">{formatTime(message.timestamp)}</span>
                       {renderMessageStatus(message)}
                     </div>
                   </div>
@@ -389,44 +381,34 @@ export default function MessageArea({ searchTerm }: MessageAreaProps) {
       {contextMenu.visible && contextMenu.message && (
         <div
           ref={contextMenuRef}
-          className="fixed z-[150] w-72 bg-white/98 backdrop-blur-3xl rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.2)] border border-slate-200 p-4 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
+          className="fixed z-[150] w-60 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200 p-1.5 animate-in fade-in zoom-in-95 duration-200"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
-          <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 mb-3">
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Operações</p>
-            <Clock className="w-4 h-4 text-white/20" />
-          </div>
-          <div className="grid grid-cols-1 gap-1.5">
+          <div className="flex flex-col">
             {[
-              { icon: Reply, label: "Responder", action: handleReply, color: "hover:bg-emerald-500/20 text-emerald-400", bg: "bg-emerald-500/10" },
-              { icon: Forward, label: "Encaminhar", action: handleForward, color: "hover:bg-blue-500/20 text-blue-400", bg: "bg-blue-500/10" },
-              { icon: Bookmark, label: contextMenu.message.isStarred ? 'Remover Lab' : 'Adicionar Lab', action: handleStar, color: "hover:bg-amber-500/20 text-amber-400", bg: "bg-amber-500/10", active: contextMenu.message.isStarred },
-              { icon: Copy, label: "Copiar Dados", action: handleCopyText, color: "hover:bg-white/10 text-white/90", bg: "bg-white/5" },
-              { icon: Share2, label: "Compartilhar", action: () => { }, color: "hover:bg-purple-500/20 text-purple-400", bg: "bg-purple-500/10" }
+              { icon: Reply, label: "Responder", action: handleReply },
+              { icon: Forward, label: "Encaminhar", action: handleForward },
+              { icon: Bookmark, label: contextMenu.message.isStarred ? 'Remover Lab' : 'Adicionar Lab', action: handleStar },
+              { icon: Copy, label: "Copiar Texto", action: handleCopyText }
             ].map((item, i) => (
               <button
                 key={i}
                 onClick={item.action}
-                className={cn(
-                  "w-full flex items-center gap-5 px-6 py-4.5 text-[11px] font-black uppercase tracking-[0.2em] transition-all rounded-[24px] group",
-                  item.color
-                )}
+                className="w-full h-11 flex items-center gap-3 px-3 text-[14px] font-medium text-slate-700 hover:bg-slate-50 transition-all rounded-xl"
               >
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110", item.bg)}>
-                  <item.icon className={cn("w-5 h-5", item.active && "fill-current")} />
-                </div>
+                <item.icon className="w-4 h-4 text-slate-400" />
                 {item.label}
               </button>
             ))}
+            <div className="my-1.5 h-px bg-slate-100" />
+            <button
+              onClick={() => setContextMenu(prev => ({ ...prev, visible: false }))}
+              className="w-full h-11 flex items-center gap-3 px-3 text-[14px] font-medium text-[#EA0038] hover:bg-red-50 transition-all rounded-xl"
+            >
+              <Trash2 className="w-4 h-4" />
+              Cancelar
+            </button>
           </div>
-          <div className="my-3 border-t border-white/5" />
-          <button
-            onClick={() => setContextMenu(prev => ({ ...prev, visible: false }))}
-            className="w-full h-14 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-white/30 hover:text-red-500 hover:bg-red-500/5 transition-all rounded-[24px]"
-          >
-            <Trash2 className="w-4 h-4" />
-            Cancelar Passo
-          </button>
         </div>
       )}
 

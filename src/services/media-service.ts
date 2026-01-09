@@ -62,7 +62,7 @@ export class MediaService {
       path.join(tenantDir, 'thumbnails'),
       path.join(tenantDir, 'images'),
       path.join(tenantDir, 'videos'),
-      path.join(tenantDir, 'audio'),
+      path.join(tenantDir, 'audios'),
       path.join(tenantDir, 'documents')
     ];
 
@@ -239,7 +239,7 @@ export class MediaService {
   }
 
   getFilePath(id: string, tenantId?: string): string | null {
-    const subTypes = ['images', 'videos', 'audio', 'documents'];
+    const subTypes = ['images', 'videos', 'audios', 'documents'];
 
     if (tenantId) {
       const tenantDir = path.join(this.uploadDir, tenantId);
@@ -318,12 +318,12 @@ export class MediaService {
       byType: {
         images: 0,
         videos: 0,
-        audio: 0,
+        audios: 0,
         documents: 0
       }
     };
 
-    const dirs = ['images', 'videos', 'audio', 'documents'] as const;
+    const dirs = ['images', 'videos', 'audios', 'documents'] as const;
     const tenantDir = path.join(this.uploadDir, tenantId);
 
     if (!fs.existsSync(tenantDir)) return stats;

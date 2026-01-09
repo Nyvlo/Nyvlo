@@ -15,7 +15,8 @@ import {
   Loader2,
   Layers,
   Rocket,
-  ShieldCheck
+  ShieldCheck,
+  Lock
 } from 'lucide-react'
 import Logo from '../components/common/Logo'
 import { clsx } from 'clsx'
@@ -139,7 +140,7 @@ function cn(...inputs: any[]) {
           </p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-8 py-3 bg-emerald-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+            className="px-8 py-3 bg-[#00A884] text-white rounded-full font-semibold text-sm hover:bg-[#008F70] transition-all shadow-sm active:scale-95"
           >
             Voltar ao Dashboard
           </button>
@@ -175,12 +176,14 @@ function cn(...inputs: any[]) {
                   </div>
                 </div>
 
-                <div className="max-w-md space-y-4">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">
-                    Nyvlo Omnichannel
+                <div className="max-w-md space-y-6">
+                  <h2 className="text-3xl font-bold text-[#111B21] tracking-tight">
+                    WhatsApp Web para Empresas
                   </h2>
-                  <p className="text-slate-400 font-medium text-lg leading-relaxed">
-                    {currentInstanceName ? `Conectado à instância ${currentInstanceName}` : 'Selecione uma conversa para iniciar o atendimento.'}
+                  <p className="text-[#667781] font-normal text-[14px] leading-relaxed">
+                    {currentInstanceName ? `Explore as conversas da instância ${currentInstanceName}` : 'Selecione uma conversa para iniciar o atendimento.'}
+                    <br />
+                    Suas mensagens são criptografadas e protegidas.
                   </p>
                 </div>
 
@@ -202,9 +205,9 @@ function cn(...inputs: any[]) {
                   ))}
                 </div>
 
-                <div className="mt-16 flex items-center gap-2 px-12 py-3 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black uppercase tracking-widest shadow-xl border border-emerald-100">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Sistema Operacional e Pronto
+                <div className="mt-16 flex items-center gap-2 text-[#8696A0] text-[12px]">
+                  <Lock className="w-3 h-3" />
+                  Criptografia de ponta a ponta
                 </div>
               </div>
             ) : (

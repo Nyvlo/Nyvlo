@@ -196,12 +196,12 @@ export class MessageHandler {
       return response;
     }
 
-    const isTimedOut = await this.stateManager.checkTimeout(userId);
+    const isTimedOut = await this.stateManager.checkTimeout(userId, this.currentTenantId);
     if (isTimedOut) {
-      await this.stateManager.resetState(userId);
+      await this.stateManager.resetState(userId, this.currentTenantId);
     }
 
-    const state = await this.stateManager.getState(userId);
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
     const intent = this.identifyIntent(message.text, state.currentState);
 
     if (intent.type === 'command') {
@@ -209,16 +209,16 @@ export class MessageHandler {
         if (state.currentState === BotState.MAIN_MENU && (state.context.currentMenuPath || []).length > 0) {
           const path = [...(state.context.currentMenuPath || [])];
           path.pop();
-          await this.stateManager.updateContext(userId, { currentMenuPath: path });
-          const newState = await this.stateManager.getState(userId);
+          await this.stateManager.updateContext(userId, { currentMenuPath: path }, this.currentTenantId);
+          const newState = await this.stateManager.getState(userId, this.currentTenantId);
           const response = this.generateMainMenu(newState);
           await this.saveOutgoingMessages(userId, response.messages, message.tenantId, message.instanceId);
           return response;
         }
 
-        await this.stateManager.transition(userId, BotState.MAIN_MENU);
-        await this.stateManager.updateContext(userId, { currentMenuPath: [] });
-        const newState = await this.stateManager.getState(userId);
+        await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+        await this.stateManager.updateContext(userId, { currentMenuPath: [] }, this.currentTenantId);
+        const newState = await this.stateManager.getState(userId, this.currentTenantId);
         const response = this.generateMainMenu(newState);
         await this.saveOutgoingMessages(userId, response.messages, message.tenantId, message.instanceId);
         return response;
@@ -233,48 +233,17 @@ export class MessageHandler {
       intent.type !== 'command';
 
     if (shouldUseAI) {
-      try {
-        const history = await this.database.getRecentMessages(userId, message.tenantId, 6);
-        const historyText = history.map((h: { isFromMe: boolean; content: string }) =>
-          `${h.isFromMe ? 'Assistente' : 'Cliente'}: ${h.content}`
-        );
-
-        // Fase 2: Buscar Base de Conhecimento
-        const knowledge = await this.database.getKnowledgeBase(this.currentTenantId);
-        const knowledgeContext = knowledge.map(k => `[${k.title}]: ${k.content}`).join('\n');
-
-        const aiResponse = await this.aiService!.processMessage(message.text, historyText, knowledgeContext);
-
-        if (aiResponse.action === 'continue' || aiResponse.action === 'enrollment' || aiResponse.action === 'appointment') {
-          const response: BotResponse = {
-            messages: [aiResponse.message],
-            nextState: state.currentState
-          };
-          await this.saveOutgoingMessages(userId, response.messages, message.tenantId, message.instanceId);
-          if (replyFn) await replyFn(userId, aiResponse.message);
-          return response;
+      const response = await this.handleWithAI(userId, message.text, message.tenantId, message.instanceId);
+      await this.saveOutgoingMessages(userId, response.messages, message.tenantId, message.instanceId);
+      if (replyFn) {
+        for (const msg of response.messages) {
+          await replyFn(userId, msg);
         }
-
-        if (aiResponse.action === 'menu') {
-          if (replyFn) await replyFn(userId, aiResponse.message);
-          await this.stateManager.transition(userId, BotState.MAIN_MENU);
-        }
-
-        if (aiResponse.action === 'transfer') {
-          const response: BotResponse = {
-            messages: [aiResponse.message],
-            nextState: BotState.HUMAN_TRANSFER
-          };
-          await this.saveOutgoingMessages(userId, response.messages, message.tenantId, message.instanceId);
-          if (replyFn) await replyFn(userId, aiResponse.message);
-          return response;
-        }
-      } catch (err) {
-        this.logger.error('Erro ao processar IA', err as Error);
       }
+      return response;
     }
 
-    const freshState = await this.stateManager.getState(userId);
+    const freshState = await this.stateManager.getState(userId, this.currentTenantId);
     const freshIntent = this.identifyIntent(message.text, freshState.currentState);
     const response = await this.processState(userId, freshState.currentState, message.text, freshIntent);
 
@@ -338,12 +307,12 @@ export class MessageHandler {
   }
 
   private async processState(userId: string, currentState: BotState, input: string, intent: Intent): Promise<BotResponse> {
-    const state = await this.stateManager.getState(userId);
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
 
     switch (currentState) {
       case BotState.WELCOME:
-        await this.stateManager.transition(userId, BotState.MAIN_MENU);
-        return this.generateWelcome(await this.stateManager.getState(userId));
+        await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+        return this.generateWelcome(await this.stateManager.getState(userId, this.currentTenantId));
 
       case BotState.MAIN_MENU:
         return this.handleMainMenu(userId, input, intent, state);
@@ -463,7 +432,7 @@ export class MessageHandler {
     const currentItems = this.findCurrentMenuItems(path);
 
     if (this.aiService && intent.type !== 'menu_selection' && intent.confidence < 0.9) {
-      return this.handleWithAI(userId, input);
+      return this.handleWithAI(userId, input, this.currentTenantId);
     }
 
     if (intent.type === 'menu_selection') {
@@ -473,8 +442,8 @@ export class MessageHandler {
         if (path.length > 0) {
           const newPath = [...path];
           newPath.pop();
-          await this.stateManager.updateContext(userId, { currentMenuPath: newPath });
-          return this.generateMainMenu(await this.stateManager.getState(userId));
+          await this.stateManager.updateContext(userId, { currentMenuPath: newPath }, this.currentTenantId);
+          return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
         }
         return this.generateMainMenu(state);
       }
@@ -482,23 +451,23 @@ export class MessageHandler {
       if (!currentItems || currentItems.length === 0) {
         switch (option) {
           case 1:
-            await this.stateManager.transition(userId, BotState.COURSES_LIST);
+            await this.stateManager.transition(userId, BotState.COURSES_LIST, undefined, this.currentTenantId);
             await this.database.logEvent(this.currentTenantId, userId, 'catalog_viewed');
             return this.generateCoursesList();
           case 2:
-            await this.stateManager.transition(userId, BotState.APPOINTMENT_START);
+            await this.stateManager.transition(userId, BotState.APPOINTMENT_START, undefined, this.currentTenantId);
             return this.generateAppointmentStart(userId, this.currentTenantId);
           case 3:
-            await this.stateManager.transition(userId, BotState.ENROLLMENT_START);
+            await this.stateManager.transition(userId, BotState.ENROLLMENT_START, undefined, this.currentTenantId);
             return this.generateEnrollmentStart(userId, this.currentTenantId);
           case 4:
-            await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES);
+            await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES, undefined, this.currentTenantId);
             return this.generateFAQCategories();
           case 5:
-            await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER);
+            await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER, undefined, this.currentTenantId);
             return this.generateHumanTransfer(userId, this.currentTenantId);
           case 6:
-            await this.stateManager.transition(userId, BotState.DOCUMENTS);
+            await this.stateManager.transition(userId, BotState.DOCUMENTS, undefined, this.currentTenantId);
             return this.generateDocumentsMenu();
           default:
             return this.createResponse([this.config.messages.invalidOption, this.generateMenuText([])], BotState.MAIN_MENU);
@@ -516,11 +485,11 @@ export class MessageHandler {
     const combinedKeywords: Record<string, any> = { ...GLOBAL_KEYWORD_MAP, ...tenantKeywords };
     if (intent.type === 'keyword' && combinedKeywords[intent.value]) {
       const targetState = combinedKeywords[intent.value] as BotState;
-      await this.stateManager.transition(userId, targetState);
+      await this.stateManager.transition(userId, targetState, undefined, this.currentTenantId);
       return this.processState(userId, targetState, input, intent);
     }
 
-    if (this.aiService) return this.handleWithAI(userId, input);
+    if (this.aiService) return this.handleWithAI(userId, input, this.currentTenantId);
     return this.createResponse([this.config.messages.invalidOption, this.generateMenuText(currentItems)], BotState.MAIN_MENU);
   }
 
@@ -529,29 +498,29 @@ export class MessageHandler {
     switch (item.action) {
       case 'submenu':
         const newPath = [...currentPath, item.id];
-        await this.stateManager.updateContext(userId, { currentMenuPath: newPath });
+        await this.stateManager.updateContext(userId, { currentMenuPath: newPath }, this.currentTenantId);
         return this.createResponse([this.generateMenuText(item.subItems || [], item.title)], BotState.MAIN_MENU);
       case 'courses':
-        await this.stateManager.transition(userId, BotState.COURSES_LIST);
+        await this.stateManager.transition(userId, BotState.COURSES_LIST, undefined, this.currentTenantId);
         await this.database.logEvent(this.currentTenantId, userId, 'catalog_viewed');
         return this.generateCoursesList();
       case 'appointment':
-        await this.stateManager.transition(userId, BotState.APPOINTMENT_START);
+        await this.stateManager.transition(userId, BotState.APPOINTMENT_START, undefined, this.currentTenantId);
         return this.generateAppointmentStart(userId, this.currentTenantId);
       case 'enrollment':
-        await this.stateManager.transition(userId, BotState.ENROLLMENT_START);
+        await this.stateManager.transition(userId, BotState.ENROLLMENT_START, undefined, this.currentTenantId);
         return this.generateEnrollmentStart(userId, this.currentTenantId);
       case 'faq':
-        await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES);
+        await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES, undefined, this.currentTenantId);
         return this.generateFAQCategories();
       case 'human':
-        await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER);
+        await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER, undefined, this.currentTenantId);
         return this.generateHumanTransfer(userId, this.currentTenantId);
       case 'contact':
         const contactInfo = `📍 *Localização*\n\n${this.config.company.address}\n\n📞 *Fone:* ${this.config.company.phone}\n📧 *Email:* ${this.config.company.email}`;
         return this.createResponse([contactInfo, this.generateMenuText(this.findCurrentMenuItems(currentPath))], BotState.MAIN_MENU);
       case 'documents':
-        await this.stateManager.transition(userId, BotState.DOCUMENTS);
+        await this.stateManager.transition(userId, BotState.DOCUMENTS, undefined, this.currentTenantId);
         return this.generateDocumentsMenu();
       case 'custom':
         return this.createResponse([item.customResponse || 'Ok.', this.generateMenuText(this.findCurrentMenuItems(currentPath))], BotState.MAIN_MENU);
@@ -574,32 +543,32 @@ export class MessageHandler {
         currentStep: 0,
         data: {}
       }
-    });
-    await this.stateManager.transition(userId, BotState.DYNAMIC_FORM);
+    }, this.currentTenantId);
+    await this.stateManager.transition(userId, BotState.DYNAMIC_FORM, undefined, this.currentTenantId);
     await this.database.logEvent(this.currentTenantId, userId, 'form_start', formId);
 
     return this.createResponse([`📋 *${form.name}*\n\n${form.steps[0].question}`], BotState.DYNAMIC_FORM);
   }
 
   private async handleDynamicForm(userId: string, input: string): Promise<BotResponse> {
-    const state = await this.stateManager.getState(userId);
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
     const formCtx = state.context.currentForm;
 
     if (!formCtx || !this.config) {
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
       return this.generateMainMenu(state);
     }
 
     const form = this.config.forms?.find(f => f.id === formCtx.formId);
     if (!form) {
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
       return this.generateMainMenu(state);
     }
 
     if (input === '0') {
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
-      await this.stateManager.updateContext(userId, { currentForm: undefined });
-      return this.generateMainMenu(await this.stateManager.getState(userId));
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+      await this.stateManager.updateContext(userId, { currentForm: undefined }, this.currentTenantId);
+      return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
     }
 
     const currentStep = form.steps[formCtx.currentStep];
@@ -615,12 +584,12 @@ export class MessageHandler {
     if (nextStepIndex < form.steps.length) {
       await this.stateManager.updateContext(userId, {
         currentForm: { ...formCtx, currentStep: nextStepIndex, data: newData }
-      });
+      }, this.currentTenantId);
       return this.createResponse([form.steps[nextStepIndex].question], BotState.DYNAMIC_FORM);
     } else {
       // Finalizou o formulário
-      await this.stateManager.updateContext(userId, { currentForm: undefined });
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
+      await this.stateManager.updateContext(userId, { currentForm: undefined }, this.currentTenantId);
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
 
       // Notificar Webhook
       this.notifyWebhook('form_complete', { formId: form.id, formName: form.name, userId, data: newData });
@@ -639,26 +608,53 @@ export class MessageHandler {
     }
   }
 
-  private async handleWithAI(userId: string, input: string): Promise<BotResponse> {
+  private async handleWithAI(userId: string, input: string, tenantId: string, instanceId?: string): Promise<BotResponse> {
     if (!this.aiService || !this.config) return this.createResponse(['Desculpe.'], BotState.MAIN_MENU);
-    try {
-      const state = await this.stateManager.getState(userId);
-      const aiResponse = await this.aiService.processMessage(input, state.context.conversationHistory || []);
-      const newHistory = [...(state.context.conversationHistory || []), `Usuário: ${input}`, `Bot: ${aiResponse.message}`].slice(-10);
-      await this.stateManager.updateContext(userId, { conversationHistory: newHistory });
 
+    try {
+      // 1. Obter histórico recente do banco para maior contexto
+      const history = await this.database.getRecentMessages(userId, tenantId, 10);
+      const historyText = history.map((h: { isFromMe: boolean; content: string }) =>
+        `${h.isFromMe ? 'Assistente' : 'Cliente'}: ${h.content}`
+      );
+
+      // 2. Buscar Base de Conhecimento
+      const knowledge = await this.database.getKnowledgeBase(tenantId);
+      const knowledgeContext = knowledge.map(k => `[${k.title}]: ${k.content}`).join('\n');
+
+      // 3. Processar com IA
+      const aiResponse = await this.aiService.processMessage(input, historyText, knowledgeContext);
+
+      // 4. Executar transições de estado baseadas na ação da IA
+      let response: BotResponse;
       switch (aiResponse.action) {
         case 'transfer':
-          await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER);
-          await this.stateManager.updateContext(userId, { appointmentData: undefined });
-          return this.generateHumanTransfer(userId, this.currentTenantId);
-        case 'appointment': await this.stateManager.transition(userId, BotState.APPOINTMENT_START); return this.createResponse([aiResponse.message], BotState.APPOINTMENT_START);
-        case 'enrollment': await this.stateManager.transition(userId, BotState.ENROLLMENT_START); return this.createResponse([aiResponse.message], BotState.ENROLLMENT_START);
-        case 'menu': return this.createResponse([aiResponse.message, this.generateMenuText(this.config.menus || [])], BotState.MAIN_MENU);
-        default: return this.createResponse([aiResponse.message], BotState.MAIN_MENU);
+          response = this.generateHumanTransfer(userId, tenantId);
+          await this.stateManager.transition(userId, response.nextState, undefined, tenantId);
+          // Adiciona a mensagem da IA como introdução se ela for cordial
+          if (aiResponse.message && !response.messages.includes(aiResponse.message)) {
+            response.messages = [aiResponse.message, ...response.messages];
+          }
+          return response;
+
+        case 'appointment':
+          await this.stateManager.transition(userId, BotState.APPOINTMENT_START, undefined, tenantId);
+          return this.createResponse([aiResponse.message], BotState.APPOINTMENT_START);
+
+        case 'enrollment':
+          await this.stateManager.transition(userId, BotState.ENROLLMENT_START, undefined, tenantId);
+          return this.createResponse([aiResponse.message], BotState.ENROLLMENT_START);
+
+        case 'menu':
+          await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, tenantId);
+          return this.createResponse([aiResponse.message, this.generateMenuText(this.config.menus || [])], BotState.MAIN_MENU);
+
+        default:
+          return this.createResponse([aiResponse.message], BotState.MAIN_MENU);
       }
     } catch (error) {
-      return this.createResponse(['Erro técnico.', this.generateMenuText(this.config.menus || [])], BotState.MAIN_MENU);
+      this.logger.error('Erro ao processar IA', error as Error);
+      return this.createResponse(['Desculpe, tive um problema técnico.', this.generateMenuText(this.config.menus || [])], BotState.MAIN_MENU);
     }
   }
 
@@ -672,17 +668,17 @@ export class MessageHandler {
   }
 
   private async handleCoursesList(userId: string, input: string): Promise<BotResponse> {
-    if (!this.config) return this.generateMainMenu(await this.stateManager.getState(userId));
+    if (!this.config) return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
     const num = parseInt(input);
     const activeCourses = this.config.courses.filter(c => c.active);
     if (num > 0 && num <= activeCourses.length) {
       const course = activeCourses[num - 1];
-      await this.stateManager.updateContext(userId, { selectedCourse: course.id });
-      await this.stateManager.transition(userId, BotState.COURSE_DETAIL);
+      await this.stateManager.updateContext(userId, { selectedCourse: course.id }, this.currentTenantId);
+      await this.stateManager.transition(userId, BotState.COURSE_DETAIL, undefined, this.currentTenantId);
       await this.database.logEvent(this.currentTenantId, userId, 'item_viewed', course.id);
       return this.generateCourseDetail(course);
     }
-    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU); return this.generateMainMenu(await this.stateManager.getState(userId)); }
+    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId); return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId)); }
     return this.createResponse([this.config.messages.invalidOption], BotState.COURSES_LIST);
   }
 
@@ -697,7 +693,7 @@ export class MessageHandler {
 
   private async handleCourseDetail(userId: string, input: string): Promise<BotResponse> {
     const num = parseInt(input);
-    const state = await this.stateManager.getState(userId);
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
     const selectedCourseId = state.context.selectedCourse;
 
     if (num === 1) {
@@ -707,11 +703,11 @@ export class MessageHandler {
         return this.handleBuyCourse(userId, course);
       }
 
-      await this.stateManager.transition(userId, BotState.ENROLLMENT_START);
+      await this.stateManager.transition(userId, BotState.ENROLLMENT_START, undefined, this.currentTenantId);
       return this.generateEnrollmentStart(userId, this.currentTenantId);
     }
-    if (num === 2) { await this.stateManager.transition(userId, BotState.COURSES_LIST); return this.generateCoursesList(); }
-    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU); return this.generateMainMenu(await this.stateManager.getState(userId)); }
+    if (num === 2) { await this.stateManager.transition(userId, BotState.COURSES_LIST, undefined, this.currentTenantId); return this.generateCoursesList(); }
+    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId); return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId)); }
     return this.createResponse([this.config?.messages.invalidOption || 'Inválido'], BotState.COURSE_DETAIL);
   }
 
@@ -724,16 +720,16 @@ export class MessageHandler {
   }
 
   private async handleFAQCategories(userId: string, input: string): Promise<BotResponse> {
-    if (!this.config) return this.generateMainMenu(await this.stateManager.getState(userId));
+    if (!this.config) return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
     const num = parseInt(input);
     const categories = [...this.config.faq.categories].sort((a, b) => a.order - b.order);
     if (num > 0 && num <= categories.length) {
       const category = categories[num - 1];
-      await this.stateManager.updateContext(userId, { selectedCategory: category.id });
-      await this.stateManager.transition(userId, BotState.FAQ_QUESTIONS);
-      return this.generateFAQQuestions(userId, category.id, await this.stateManager.getState(userId));
+      await this.stateManager.updateContext(userId, { selectedCategory: category.id }, this.currentTenantId);
+      await this.stateManager.transition(userId, BotState.FAQ_QUESTIONS, undefined, this.currentTenantId);
+      return this.generateFAQQuestions(userId, category.id, await this.stateManager.getState(userId, this.currentTenantId));
     }
-    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU); return this.generateMainMenu(await this.stateManager.getState(userId)); }
+    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId); return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId)); }
     return this.createResponse([this.config.messages.invalidOption], BotState.FAQ_CATEGORIES);
   }
 
@@ -751,15 +747,15 @@ export class MessageHandler {
   private async handleFAQQuestions(userId: string, input: string, state: UserState): Promise<BotResponse> {
     if (!this.config) return this.generateMainMenu(state);
     const categoryId = state.context.selectedCategory;
-    if (!categoryId) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES); return this.generateFAQCategories(); }
+    if (!categoryId) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES, undefined, this.currentTenantId); return this.generateFAQCategories(); }
     const num = parseInt(input);
     const questions = this.config.faq.questions.filter(q => q.categoryId === categoryId).sort((a, b) => a.order - b.order);
     if (num > 0 && num <= questions.length) {
       const question = questions[num - 1];
-      await this.stateManager.transition(userId, BotState.FAQ_ANSWER);
+      await this.stateManager.transition(userId, BotState.FAQ_ANSWER, undefined, this.currentTenantId);
       return this.generateFAQAnswer(question);
     }
-    if (num === 0) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES); return this.generateFAQCategories(); }
+    if (num === 0) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES, undefined, this.currentTenantId); return this.generateFAQCategories(); }
     return this.createResponse([this.config.messages.invalidOption], BotState.FAQ_QUESTIONS);
   }
 
@@ -770,9 +766,9 @@ export class MessageHandler {
 
   private async handleFAQAnswer(userId: string, input: string): Promise<BotResponse> {
     const num = parseInt(input);
-    if (num === 1) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES); return this.generateFAQCategories(); }
-    if (num === 2) { await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER); return this.generateHumanTransfer(userId, this.currentTenantId); }
-    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU); return this.generateMainMenu(await this.stateManager.getState(userId)); }
+    if (num === 1) { await this.stateManager.transition(userId, BotState.FAQ_CATEGORIES, undefined, this.currentTenantId); return this.generateFAQCategories(); }
+    if (num === 2) { await this.stateManager.transition(userId, BotState.HUMAN_TRANSFER, undefined, this.currentTenantId); return this.generateHumanTransfer(userId, this.currentTenantId); }
+    if (num === 0) { await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId); return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId)); }
     return this.createResponse([this.config?.messages.invalidOption || 'Inválido'], BotState.FAQ_ANSWER);
   }
 
@@ -798,9 +794,9 @@ export class MessageHandler {
             amount: course.price,
             paymentUrl: paymentLink.paymentUrl
           }
-        });
+        }, this.currentTenantId);
 
-        await this.stateManager.transition(userId, BotState.PAYMENT_PENDING);
+        await this.stateManager.transition(userId, BotState.PAYMENT_PENDING, undefined, this.currentTenantId);
 
         let message = `💳 *Link de Pagamento Gerado*\n\n`;
         message += `Item: ${course.name}\n`;
@@ -831,9 +827,9 @@ export class MessageHandler {
           pixCopyPaste: pix.copyPaste,
           pixQrCode: pix.qrCode
         }
-      });
+      }, this.currentTenantId);
 
-      await this.stateManager.transition(userId, BotState.PAYMENT_PENDING);
+      await this.stateManager.transition(userId, BotState.PAYMENT_PENDING, undefined, this.currentTenantId);
 
       let message = `💠 *Pagamento via PIX*\n\n`;
       message += `Item: ${course.name}\n`;
@@ -852,9 +848,14 @@ export class MessageHandler {
 
   private async handlePaymentPending(userId: string, input: string): Promise<BotResponse> {
     if (input === '0') {
-      await this.stateManager.updateContext(userId, { currentOrder: undefined });
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
-      return this.generateMainMenu(await this.stateManager.getState(userId));
+      await this.stateManager.updateContext(userId, { currentOrder: undefined }, this.currentTenantId);
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+      return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
+    }
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
+    if (!state.context.currentOrder) {
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+      return this.generateMainMenu(state);
     }
     return this.createResponse(['Aguardando confirmação do pagamento... Digite 0 para cancelar.'], BotState.PAYMENT_PENDING);
   }
@@ -910,10 +911,11 @@ export class MessageHandler {
 
   // Appointment Handlers
   private async handleAppointmentStart(userId: string, input: string): Promise<BotResponse> {
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
     // Input might be "0" or "back"
     if (input === '0') {
-      await this.stateManager.transition(userId, BotState.MAIN_MENU);
-      return this.generateMainMenu(await this.stateManager.getState(userId));
+      await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+      return this.generateMainMenu(state);
     }
 
     // Try to parse relative dates from input (e.g. "amanhã", "segunda")
@@ -953,8 +955,8 @@ export class MessageHandler {
 
       await this.stateManager.updateContext(userId, {
         appointmentData: { date: dateStr } as any
-      });
-      await this.stateManager.transition(userId, BotState.APPOINTMENT_TIME);
+      }, this.currentTenantId);
+      await this.stateManager.transition(userId, BotState.APPOINTMENT_TIME, undefined, this.currentTenantId);
 
       const slotsText = slots.slice(0, 15).join(', ') + (slots.length > 15 ? '...' : '');
       return this.createResponse([`Horários livres para ${dateStr}:\n\n${slotsText}\n\nDigite o horário desejado (ex: 14:00).`], BotState.APPOINTMENT_TIME);
@@ -969,7 +971,7 @@ export class MessageHandler {
 
   private async handleAppointmentTime(userId: string, input: string): Promise<BotResponse> {
     if (input === '0') {
-      await this.stateManager.transition(userId, BotState.APPOINTMENT_START);
+      await this.stateManager.transition(userId, BotState.APPOINTMENT_START, undefined, this.currentTenantId);
       return this.createResponse(['Escolha outra data.'], BotState.APPOINTMENT_START);
     }
 
@@ -983,7 +985,7 @@ export class MessageHandler {
     const timeStr = `${match[1].padStart(2, '0')}:${match[2]}`;
 
     // Verify availability again (race condition check)
-    const state = await this.stateManager.getState(userId);
+    const state = await this.stateManager.getState(userId, this.currentTenantId);
     const dateStr = state.context.appointmentData?.date;
 
     if (!dateStr) return this.createResponse(['Erro de estado. Comece novamente.'], BotState.APPOINTMENT_START);
@@ -995,11 +997,11 @@ export class MessageHandler {
 
     await this.stateManager.updateContext(userId, {
       appointmentData: { ...state.context.appointmentData, time: timeStr } as any
-    });
+    }, this.currentTenantId);
 
     // Ask for Name if we don't know it (assuming we might define it in Lead, but let's confirm logic)
     // For now, jump to Confirmation
-    await this.stateManager.transition(userId, BotState.APPOINTMENT_CONFIRM);
+    await this.stateManager.transition(userId, BotState.APPOINTMENT_CONFIRM, undefined, this.currentTenantId);
 
     return this.createResponse([
       `Confirma agendamento?\n\n📅 Data: ${dateStr}\n⏰ Hora: ${timeStr}\n\nDigite 1 para Sim, 0 para Cancelar.`
@@ -1008,10 +1010,10 @@ export class MessageHandler {
 
   private async handleAppointmentConfirm(userId: string, input: string): Promise<BotResponse> {
     if (input === '1' || input.toLowerCase() === 'sim') {
-      const state = await this.stateManager.getState(userId);
+      const state = await this.stateManager.getState(userId, this.currentTenantId);
       const data = state.context.appointmentData;
       if (!data || !data.date || !data.time) {
-        await this.stateManager.transition(userId, BotState.APPOINTMENT_START);
+        await this.stateManager.transition(userId, BotState.APPOINTMENT_START, undefined, this.currentTenantId);
         return this.createResponse(['Dados perdidos. Tente novamente.'], BotState.APPOINTMENT_START);
       }
 
@@ -1028,8 +1030,8 @@ export class MessageHandler {
           purpose: 'Atendimento'
         });
 
-        await this.stateManager.transition(userId, BotState.MAIN_MENU);
-        await this.stateManager.updateContext(userId, { appointmentData: undefined });
+        await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+        await this.stateManager.updateContext(userId, { appointmentData: undefined }, this.currentTenantId);
 
         return this.createResponse(['✅ Agendamento confirmado com sucesso! Enviamos um lembrete antes do horário.'], BotState.MAIN_MENU);
 
@@ -1042,8 +1044,8 @@ export class MessageHandler {
       }
     }
 
-    await this.stateManager.transition(userId, BotState.MAIN_MENU);
-    return this.generateMainMenu(await this.stateManager.getState(userId));
+    await this.stateManager.transition(userId, BotState.MAIN_MENU, undefined, this.currentTenantId);
+    return this.generateMainMenu(await this.stateManager.getState(userId, this.currentTenantId));
   }
 
 

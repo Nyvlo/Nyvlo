@@ -1388,26 +1388,50 @@ export class AdminServer {
               socket.emit('error', { message: 'WhatsApp não disponível' });
               return;
             }
-            messageId = await whatsappManager.sendMessage(
-              conversation.instance_id,
-              conversation.whatsapp_chat_id,
-              content
-            );
+
+            if (type === 'audio' && mediaId) {
+              // Construct full URL for sendAudio (assuming localhost for now, or use absolute path if we can resolve it)
+              // Better: resolving path from mediaId if possible, but Baileys handles URLs.
+              // We'll use the API URL passing localhost
+              const audioUrl = `http://localhost:${process.env.PORT || 4000}/api/media/${mediaId}/file`;
+              messageId = await whatsappManager.sendAudio(
+                conversation.instance_id,
+                conversation.whatsapp_chat_id,
+                audioUrl
+              );
+            } else if (['image', 'video', 'document'].includes(type) && mediaId) {
+              const mediaUrl = `http://localhost:${process.env.PORT || 4000}/api/media/${mediaId}/file`;
+              messageId = await whatsappManager.sendMedia(
+                conversation.instance_id,
+                conversation.whatsapp_chat_id,
+                mediaUrl,
+                type as any,
+                content // caption
+              );
+            } else {
+              messageId = await whatsappManager.sendMessage(
+                conversation.instance_id,
+                conversation.whatsapp_chat_id,
+                content
+              );
+            }
           }
 
           // Save to database
-          const id = `msg_${Date.now()}`;
+          const id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           const timestamp = new Date().toISOString();
           const senderId = (socket as any).userId || 'system';
           const senderName = (socket as any).userRole || 'admin';
+          const tenantId = (socket as any).tenantId || 'system-default';
 
           await this.database.run(`
             INSERT INTO web_messages (
-              id, conversation_id, whatsapp_message_id, sender_id, sender_name,
+              id, tenant_id, conversation_id, whatsapp_message_id, sender_id, sender_name,
               type, content, media_url, reply_to_id, status_sent, is_from_me, timestamp, is_internal
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `, [
             id,
+            tenantId,
             conversationId,
             isInternal ? null : messageId,
             senderId,
@@ -1416,6 +1440,8 @@ export class AdminServer {
             content,
             null,
             replyTo || null,
+            1,
+            1,
             timestamp,
             isInternal ? 1 : 0
           ]);

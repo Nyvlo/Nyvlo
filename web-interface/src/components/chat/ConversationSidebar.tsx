@@ -23,7 +23,6 @@ import {
   Inbox,
   Loader2,
   ChevronRight,
-  Filter,
   Monitor
 } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -205,7 +204,7 @@ export default function ConversationSidebar() {
     return (
       <span className="flex items-center gap-1.5 min-w-0">
         {conv.lastMessage.isFromMe && (
-          conv.lastMessage.status.read ? <CheckCheck className="w-4 h-4 text-blue-400 flex-shrink-0" /> : <Check className="w-4 h-4 text-slate-300 flex-shrink-0" />
+          (conv.lastMessage.status?.read) ? <CheckCheck className="w-4 h-4 text-blue-400 flex-shrink-0" /> : <Check className="w-4 h-4 text-slate-300 flex-shrink-0" />
         )}
         <span className="truncate text-slate-500 font-medium">{prefix + content}</span>
       </span>
@@ -216,60 +215,60 @@ export default function ConversationSidebar() {
     <div
       key={conv.id}
       className={cn(
-        "group relative flex items-center gap-4 px-6 py-5 cursor-pointer transition-all border-b border-slate-50/50",
+        "group relative flex items-center gap-3 px-4 py-4 cursor-pointer transition-all border-b border-[#F2F2F2]/60",
         selectedConversation?.id === conv.id
-          ? "bg-emerald-50/60"
-          : "bg-white hover:bg-slate-50/80 active:scale-[0.99]",
+          ? "bg-[#F0F2F5]"
+          : "bg-white hover:bg-[#F5F6F6]",
       )}
       onClick={() => selectConversation(conv)}
       onContextMenu={(e) => handleContextMenu(e, conv)}
     >
       <div className="relative flex-shrink-0">
         <div className={cn(
-          "w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 border-2 transition-transform group-hover:scale-105 duration-300",
-          selectedConversation?.id === conv.id ? "border-emerald-200/50" : "border-white shadow-sm"
+          "w-12 h-12 rounded-full overflow-hidden bg-slate-100 border transition-transform duration-300",
+          selectedConversation?.id === conv.id ? "border-transparent" : "border-transparent"
         )}>
           {conv.profilePicture ? (
             <img src={conv.profilePicture} alt={conv.name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+            <div className="w-full h-full flex items-center justify-center text-slate-400 bg-[#DFE5E7]">
               {conv.type === 'group' ? <Monitor className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
             </div>
           )}
         </div>
         {conv.isPinned && (
-          <div className="absolute -top-1.5 -right-1.5 bg-white p-1.5 rounded-xl border border-slate-100 shadow-xl text-emerald-500">
-            <Pin className="w-3 h-3 fill-emerald-500" />
+          <div className="absolute -top-1 -right-1 bg-white p-1 rounded-full shadow-sm text-[#717D84]">
+            <Pin className="w-2.5 h-2.5 fill-current rotate-45" />
           </div>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between mb-0.5">
           <h4 className={cn(
-            "text-[15px] truncate tracking-tight",
-            conv.unreadCount > 0 ? "font-black text-slate-900" : "font-bold text-slate-800"
+            "text-[15px] truncate",
+            conv.unreadCount > 0 ? "font-semibold text-[#111B21]" : "font-medium text-[#111B21]"
           )}>{conv.name}</h4>
           {conv.lastMessage && (
             <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest whitespace-nowrap",
-              conv.unreadCount > 0 ? "text-emerald-500" : "text-slate-400"
+              "text-[11px] whitespace-nowrap",
+              conv.unreadCount > 0 ? "font-semibold text-[#00A884]" : "font-normal text-[#667781]"
             )}>
               {formatTime(conv.lastMessage.timestamp)}
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0 text-[13px]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0 text-[13px] text-[#667781]">
             {getLastMessagePreview(conv)}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {conv.labels?.slice(0, 2).map(label => (
-              <div key={label.id} className="w-2.5 h-2.5 rounded-full ring-2 ring-white border border-black/5" style={{ backgroundColor: label.color }} title={label.name} />
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {conv.labels?.slice(0, 1).map(label => (
+              <div key={label.id} className="w-2 h-2 rounded-full" style={{ backgroundColor: label.color }} />
             ))}
             {conv.unreadCount > 0 && (
-              <span className="bg-emerald-500 text-white text-[10px] font-black min-w-[22px] h-5.5 px-2 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-in zoom-in">
+              <span className="bg-[#25D366] text-white text-[11px] font-semibold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
                 {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
               </span>
             )}
@@ -288,20 +287,20 @@ export default function ConversationSidebar() {
           <div className="relative">
             <button
               onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-              className="group flex items-center gap-3 p-1.5 rounded-[22px] hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+              className="group flex items-center gap-3 p-1 rounded-xl hover:bg-slate-50 transition-all"
             >
               <div className="relative">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-500 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-500/20 transition-transform group-hover:scale-105">
+                <div className="w-10 h-10 rounded-full bg-[#00A884] flex items-center justify-center text-white font-semibold shadow-sm">
                   {user?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className={cn(
-                  "absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full border-[3px] border-white shadow-sm ring-1 ring-slate-100",
+                  "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white shadow-sm",
                   getStatusColorClass(user?.status)
                 )} />
               </div>
               <div className="text-left hidden lg:block overflow-hidden pr-2">
-                <p className="text-[13px] font-black text-slate-900 leading-none truncate">{user?.name?.split(' ')[0]}</p>
-                <p className="text-[9px] font-black text-slate-400 mt-1 uppercase tracking-widest">{getStatusLabel(user?.status)}</p>
+                <p className="text-[14px] font-semibold text-[#111B21] leading-none truncate">{user?.name?.split(' ')[0]}</p>
+                <p className="text-[11px] text-[#667781] mt-1">{getStatusLabel(user?.status)}</p>
               </div>
               <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", showStatusDropdown && "rotate-180")} />
             </button>
@@ -426,29 +425,25 @@ export default function ConversationSidebar() {
       </div>
 
       {/* Search Bar Section */}
-      <div className="px-6 pb-6">
+      <div className="px-4 pb-4">
         <div className="relative group">
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl shadow-sm text-slate-300 group-focus-within:text-emerald-500 group-focus-within:shadow-emerald-500/10 transition-all border border-slate-100">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#667781]">
             <Search className="w-4 h-4" />
           </div>
           <input
             type="text"
-            placeholder="Pesquisar conversa ou mensagem..."
-            className="w-full h-14 pl-16 pr-12 bg-slate-50 border border-transparent rounded-[24px] text-[13px] font-bold text-slate-900 placeholder:text-slate-300 placeholder:font-black placeholder:uppercase placeholder:tracking-widest focus:outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/20 transition-all shadow-inner"
+            placeholder="Pesquisar..."
+            className="w-full h-9 pl-12 pr-10 bg-[#F0F2F5] border-none rounded-lg text-[14px] font-normal text-[#111B21] placeholder:text-[#667781] focus:outline-none focus:ring-0 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {searchQuery ? (
+          {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-red-50 rounded-xl transition-all text-slate-400 hover:text-red-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#667781] hover:text-[#111B21]"
             >
               <X className="w-4 h-4" />
             </button>
-          ) : (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-200">
-              <Filter className="w-4 h-4" />
-            </div>
           )}
         </div>
       </div>

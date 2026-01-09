@@ -32,7 +32,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     req.tenantId = decoded.tenantId || 'system-default';
     req.username = decoded.username;
     req.userRole = decoded.role;
-    req.allowedInstances = decoded.allowedInstances;
+    req.allowedInstances = decoded.allowedInstances || [];
 
     next();
 

@@ -148,8 +148,10 @@ export class BaileysAdapter {
           }
         }
 
-        if (msg.key.fromMe) continue;
         if (!msg.message) continue;
+
+        // Skip status updates (broadcasts)
+        if (msg.key.remoteJid === 'status@broadcast') continue;
 
         const incomingMessage = this.parseMessage(msg);
         if (incomingMessage && this.messageHandler) {
@@ -301,6 +303,7 @@ export class BaileysAdapter {
     );
     return buffer as Buffer;
   }
+
 
   async findMessage(chatId: string, messageId: string): Promise<proto.IWebMessageInfo | null> {
     const cacheKey = `${chatId}:${messageId}`;

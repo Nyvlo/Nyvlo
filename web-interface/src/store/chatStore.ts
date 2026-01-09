@@ -98,6 +98,7 @@ interface ChatState {
   loadQuickMessages: () => Promise<void>
   loadLabels: () => Promise<void>
   updateConversationLabels: (conversationId: string, labelIds: string[]) => Promise<void>
+  closeConversation: (conversationId: string) => void
   toggleStarMessage: (messageId: string, starred: boolean) => Promise<void>
   setReplyTo: (message: Message | null) => void
 }
@@ -506,22 +507,38 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   toggleStarMessage: async (messageId, starred) => {
-    const { instanceId, selectedConversation, messages } = get()
-    if (!instanceId || !selectedConversation) return
-    const { conversationsApi } = await import('../services/api')
-    const response = await conversationsApi.starMessage(instanceId, selectedConversation.id, messageId, starred)
-    if (response.success) {
-      const convMessages = messages[selectedConversation.id] || []
-      set({
-        messages: {
-          ...messages,
-          [selectedConversation.id]: convMessages.map(m =>
-            m.id === messageId ? { ...m, isStarred: starred } : m
-          )
-        }
-      })
+    const { messages, selectedConversation, socket } = get()
+    if (!selectedConversation) return
+
+    // Immediately update local state
+    const currentMessages = messages[selectedConversation.id] || []
+    const updatedMessages = currentMessages.map(m =>
+      m.id === messageId ? { ...m, isStarred: starred } : m
+    )
+
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [selectedConversation.id]: updatedMessages
+      }
+    }))
+
+    // Emit to socket (assuming implementation exists on backend or we add it later)
+    // For now purely frontend or handled via message update
+    if (socket) {
+      socket.emit('message:star', { messageId, conversationId: selectedConversation.id, starred })
     }
   },
 
-  setReplyTo: (message) => set({ replyTo: message }),
+  setReplyTo: (message) => {
+    set({ replyTo: message })
+  },
+
+  closeConversation: (conversationId) => {
+    const { socket, instanceId } = get()
+    if (socket && instanceId) {
+      socket.emit('conversation:close', { conversationId, instanceId })
+      // Optionally update local state to reflect closed status if needed
+    }
+  }
 }))

@@ -140,8 +140,8 @@ export class WhatsAppManager extends EventEmitter {
       });
 
       adapter.onMessage(async (message) => {
-        // Process for bot
-        if (this.messageHandler) {
+        // Process for bot (SKIP if from me)
+        if (this.messageHandler && !message.isFromMe) {
           await this.messageHandler(instanceId, message);
         }
 
@@ -247,6 +247,22 @@ export class WhatsAppManager extends EventEmitter {
     // Mark as manual send so processWebMessage knows it's an agent
     instance.isManualSend = true;
     await instance.adapter.sendText(to, message);
+  }
+
+  async sendAudio(instanceId: string, to: string, audioPath: string): Promise<void> {
+    const instance = this.instances.get(instanceId);
+    if (!instance || !instance.adapter || instance.status !== 'connected') {
+      throw new Error('Instância não conectada');
+    }
+
+    instance.isManualSend = true;
+
+    // For local files, verify existence
+    // If it's a URL, Baileys handles it
+    const isUrl = audioPath.startsWith('http');
+
+    // Call sendMedia on adapter
+    await instance.adapter.sendMedia(to, audioPath, 'audio', undefined);
   }
 
   async sendMedia(instanceId: string, to: string, mediaUrl: string, type: 'image' | 'video' | 'audio' | 'document', caption?: string): Promise<void> {
@@ -423,29 +439,37 @@ export class WhatsAppManager extends EventEmitter {
         : new Date().toISOString();
 
       if (!instance?.useBridgeMode) {
-        await this.database.run(`
-          INSERT INTO web_messages (
-            id, tenant_id, conversation_id, whatsapp_message_id, sender_id, sender_name,
-            type, content, media_url, status_sent, status_delivered, is_from_me, timestamp
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
-          msgId,
-          tenantId,
-          conversation.id,
-          messageId,
-          participant || chatId,
-          pushName || (participant || chatId).split('@')[0],
-          msgType,
-          content,
-          mediaUrl,
-          1,
-          1,
-          isFromMe ? 1 : 0,
-          timestamp
-        ]);
+        // Check for duplicate message first
+        const existing = await this.database.get<{ id: string }>(
+          'SELECT id FROM web_messages WHERE whatsapp_message_id = ? AND tenant_id = ?',
+          [messageId, tenantId]
+        );
 
-        // Update conversation timestamp
-        await this.database.run('UPDATE web_conversations SET updated_at = ? WHERE id = ?', [timestamp, conversation.id]);
+        if (!existing) {
+          await this.database.run(`
+            INSERT INTO web_messages (
+              id, tenant_id, conversation_id, whatsapp_message_id, sender_id, sender_name,
+              type, content, media_url, status_sent, status_delivered, is_from_me, timestamp
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [
+            msgId,
+            tenantId,
+            conversation.id,
+            messageId,
+            participant || chatId,
+            pushName || (participant || chatId).split('@')[0],
+            msgType,
+            content,
+            mediaUrl,
+            1,
+            1,
+            isFromMe ? 1 : 0,
+            timestamp
+          ]);
+
+          // Update conversation timestamp
+          await this.database.run('UPDATE web_conversations SET updated_at = ? WHERE id = ?', [timestamp, conversation.id]);
+        }
       } else {
         this.logger.debug('Modo Bridge Ativo: Pulando salvamento de mensagem no banco', { messageId });
       }

@@ -19,10 +19,12 @@ export interface MenuOption {
   description?: string;
 }
 
+import { BotState } from './state';
+
 export interface BotResponse {
   messages: string[];
   media?: MediaAttachment;
-  nextState: string;
+  nextState: BotState;
 }
 
 export interface MediaAttachment {
